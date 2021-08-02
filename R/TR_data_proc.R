@@ -334,7 +334,7 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   Date1 <- E_range$date_min
   Date2 <- E_range$date_max
   
-  if(is.null(lastDate)){lastDate <- Date2}
+  if(is.null(lastDate)){lastDate <- substr(Date2, 1, 10)}
   
   if(is.null(irrg.dts)){irrg.dts <- lastDate}
 
