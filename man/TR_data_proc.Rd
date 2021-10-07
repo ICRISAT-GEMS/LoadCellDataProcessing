@@ -12,6 +12,7 @@ TR_data_proc(
   lastDate = NULL,
   irrg.dts = NULL,
   skew_test = TRUE,
+  get_feature_h2 = FALSE,
   res_path = NULL
 )
 }
@@ -84,6 +85,9 @@ Default = NULL.}
 
 \item{skew_test}{\code{Logical value} specifying if skewness test
 should be used to filter weather data. Default = TRUE.}
+
+\item{get_feature_h2}{\code{Logical value} specifying if the heritability
+of the features (using gam function) should be calculated? Default = FALSE.}
 
 \item{res_path}{path location where the results will be saved. Default = NULL.}
 }

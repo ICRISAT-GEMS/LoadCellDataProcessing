@@ -107,6 +107,9 @@
 #' @param skew_test \code{Logical value} specifying if skewness test
 #' should be used to filter weather data. Default = TRUE.
 #' 
+#' @param get_feature_h2 \code{Logical value} specifying if the heritability
+#' of the features (using gam function) should be calculated? Default = FALSE.
+#' 
 #' @param res_path path location where the results will be saved. Default = NULL.
 #' 
 #' @return Return:
@@ -205,10 +208,11 @@
 # # load the side functions
 # source('F:/ICRISAT/Phenotyping/Evapotranspiration/scripts/extra_functions.R')
 
+
+
 TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
                          sensor_data = NULL, lastDate = NULL,
-                         irrg.dts = NULL, skew_test = TRUE, res_path = NULL)
-  {
+                         irrg.dts = NULL, skew_test = TRUE, get_feature_h2 = FALSE, res_path = NULL){
   
   
   # Check the function arguments format and make some adaptations
@@ -881,12 +885,18 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   rownames(F.He) <- unq.dts
 
   # For now, do not save features per day.
+  
+  if(get_feature_h2){ 
+    
+    # featureHeRES <- getFeatureHe(x = allFeatures, y = raw.trans, d = unq.dts, p = opPATH.raw)
+    featureHeRES <- getFeatureHe(x = allFeatures, y = raw.trans, d = unq.dts,
+                                 F.He = F.He)
+    
+    ### write.csv(featureHeRES, paste0(opPATH, "rawTr_featureH2.csv"))
+    
+    }
 
-  # featureHeRES <- getFeatureHe(x = allFeatures, y = raw.trans, d = unq.dts, p = opPATH.raw)
-  featureHeRES <- getFeatureHe(x = allFeatures, y = raw.trans, d = unq.dts,
-                               F.He = F.He)
-
-  ### write.csv(featureHeRES, paste0(opPATH, "rawTr_featureH2.csv"))
+ 
 
   ### save all features as feature Time Series ###
   ### Each feature set: dim(length(unq.dts) x (nrow(raw.trans)-8)) ###
@@ -1077,12 +1087,16 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   # for now no intermediary saving of all features per day.
 
   # featureHeRES <- getFeatureHe(x = allFeatures, y = smth.trans, d = unq.dts, p = opPATH.smth)
-  featureHeRES <- getFeatureHe(x = allFeatures, y = smth.trans, d = unq.dts,
-                               F.He = F.He)
-
-  ### write.csv(featureHeRES, paste0(opPATH, "smthTr_featureH2.csv"))
-
-
+  
+  if(get_feature_h2){
+    
+    featureHeRES <- getFeatureHe(x = allFeatures, y = smth.trans, d = unq.dts,
+                                 F.He = F.He)
+    
+    ### write.csv(featureHeRES, paste0(opPATH, "smthTr_featureH2.csv"))
+    
+  }
+  
   ### save all features as feature Time Series ###
   ### Each feature set: dim(length(unq.dts) x (nrow(raw.trans)-8)) ###
 
@@ -1270,6 +1284,7 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
                    sim_ETobs_ETPenMont_smth = sim_ETobs_ETPenMont_smth)
 
   results <- list(TR_raw = res_raw, TR_smth = res_smth)
+  class(results) <- c('TRres', 'list')
 
   end.time <- Sys.time()
 
