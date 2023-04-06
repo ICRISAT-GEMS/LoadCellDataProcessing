@@ -101,7 +101,7 @@ extractRawLCmatrix <- function(x, y, z) {
   print("Loadcell matrix timestamp mapping status")
 
   i<-nrow(m.lc.df)
-  pbar <- create_progress_bar('text')
+  pbar <- create_progress_bar("text")
   pbar$init(i)
 
   for(i in 1:nrow(m.lc.df))

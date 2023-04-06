@@ -147,6 +147,8 @@
 #'
 #' @examples
 #'
+#' library(plyr)
+#' 
 #' data(lc_data)
 #' data(pe_data)
 #' data(wth_data)
@@ -162,24 +164,24 @@
 #' 
 #' @import easypackages
 #' @import readxl
-#' @import hms
-#' @import xts
+# #' @import hms
+#' @importFrom xts xts
+#' @importFrom plyr create_progress_bar
 #' @import dplyr
 #' @import mgcv
 #' @import PerformanceAnalytics
-#' @import signal
+# #' @import signal
 #' @import tidyverse
 #' @import zoo
-#' @import h2o
+#' @importFrom h2o ifelse
 #' @import sqldf
 #' @import ggplot2
-#' @import plyr
 #' @import lubridate
 #' @import BioFTF
 #' @import plantecophys
 #' @import highfrequency
 #' @import stringr
-#' @import nonlinearTseries
+#' @importFrom nonlinearTseries nonLinearNoiseReduction
 #' @import tsfeatures
 #' @import splitstackshape
 #'

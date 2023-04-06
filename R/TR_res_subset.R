@@ -19,7 +19,6 @@
 #'
 #' @author ICRISAT-GEMS
 #'
-#' @references
 #'
 #' @examples
 #'

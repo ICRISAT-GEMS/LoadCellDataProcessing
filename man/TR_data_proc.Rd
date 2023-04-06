@@ -154,6 +154,8 @@ Then the same parameters are extracted but from TR_smth.
 }
 \examples{
 
+library(plyr)
+
 data(lc_data)
 data(pe_data)
 data(wth_data)

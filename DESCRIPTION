@@ -4,7 +4,7 @@ Version: 1.0.0
 Date: 2021-07-05
 Title: Processing Load cell data from the LeasyScan HTP platform
 Author: Soumyashree Kar[aut, cre], ICRISAT-GEMS [aut, ctb]
-Maintainer: ICRISAT-GEMS <V.Garin@cgiar.org>, Soumyashree Kar <ksoumya2301@gmail.com>
+Maintainer: ICRISAT-GEMS <vincent.garin6@gmail.com>, Soumyashree Kar <ksoumya2301@gmail.com>
 Description: Functions to process the load cell data from the LeasyScan HTP platform and compute parameters describing the transpiration of the genotypes evaluated on the platform.
 License: GPL-3
 Imports: easypackages, readxl, hms, xts, dplyr, mgcv,
@@ -14,6 +14,6 @@ Imports: easypackages, readxl, hms, xts, dplyr, mgcv,
 Depends: R(>= 3.5)
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.3
 NeedsCompilation: no
 Packaged: 2021-07-08 08:12:33 UTC; gebruiker
