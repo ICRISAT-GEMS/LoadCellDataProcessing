@@ -10,7 +10,7 @@ getFeatureHe <- function(x, y, d, F.He) {
   for (i in 1:length(dates)){
     
     # create tmp DF to store feature values of all genos of 'each date'
-    tmp <- as.data.frame(matrix(NA, nr = (nrow(raw.trans)-8), ncol = 15)) # 15 corresponds to the features
+    tmp <- as.data.frame(matrix(NA, nrow = (nrow(raw.trans)-8), ncol = 15)) # 15 corresponds to the features
     colnames(tmp) <- c("maxET", "slope.maxET-6", "slope.07-maxET", "slope.00-07", "slope.19-23:45", "curvmaxET", 
                        "total.auc","auc.10-15", "sd.10-15", "auc.prop.10-15", "auc.07-19", "sd.07-19",  
                        "auc.prop.07-19", "auc.night", "cos.sim.index")

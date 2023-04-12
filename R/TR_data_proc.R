@@ -140,7 +140,7 @@
 #'
 #' @references
 #' 
-#' Kar, S., Tanaka, R., Korbu, L. B., Kholová, J., Iwata, H., Durbha, S. S., ...
+#' Kar, S., Tanaka, R., Korbu, L. B., Kholova, J., Iwata, H., Durbha, S. S., ...
 #' & Vadez, V. (2020). Automated discretization of ‘transpiration restriction
 #' to increasing VPD’features from outdoors high-throughput phenotyping data.
 #' Plant methods, 16(1), 1-20.
@@ -162,28 +162,33 @@
 #' 
 #' }
 #' 
-#' @import easypackages
-#' @import readxl
-# #' @import hms
-#' @importFrom xts xts
-#' @importFrom plyr create_progress_bar
+#' @import BioFTF
 #' @import dplyr
+#' @import ggplot2
+#' @import highfrequency
+#' @import lubridate
 #' @import mgcv
 #' @import PerformanceAnalytics
-# #' @import signal
-#' @import tidyverse
-#' @import zoo
-#' @importFrom h2o ifelse
-#' @import sqldf
-#' @import ggplot2
-#' @import lubridate
-#' @import BioFTF
-#' @import plantecophys
-#' @import highfrequency
-#' @import stringr
-#' @importFrom nonlinearTseries nonLinearNoiseReduction
-#' @import tsfeatures
 #' @import splitstackshape
+#' @import tsfeatures
+#' @importFrom h2o ifelse
+#' @importFrom grDevices boxplot.stats
+#' @importFrom graphics boxplot lines
+#' @importFrom plyr create_progress_bar
+#' @importFrom psych describe
+#' @importFrom nonlinearTseries nonLinearNoiseReduction
+#' @importFrom stats dist lm median na.exclude na.omit quantile sd smooth.spline time ts var
+#' @importFrom utils head
+#' @importFrom xts xts
+#' @importFrom zoo na.aggregate.default na.approx na.locf
+# #' @import easypackage
+# #' @import tidyverse
+# #' @import readxl
+# #' @import sqldf
+# #' @import plantecophys
+# #' @import stringr
+# #' @import signal
+# #' @import hms
 #'
 #'
 #' @export
@@ -904,21 +909,21 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   ### Each feature set: dim(length(unq.dts) x (nrow(raw.trans)-8)) ###
 
   ## Prepare data for 'each feature'
-  maxET <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  slope.maxET.6 <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  slope.07maxET <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  slope.00.07 <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  slope.19.2345 <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  curvmaxET <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  total.auc <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  auc.10.15 <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  sd.10.15 <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  auc.prop.10.15 <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  auc.07.19 <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  sd.07.19 <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  auc.prop.07.19 <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  auc.night <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  cos.sim.index <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
+  maxET <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  slope.maxET.6 <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  slope.07maxET <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  slope.00.07 <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  slope.19.2345 <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  curvmaxET <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  total.auc <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  auc.10.15 <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  sd.10.15 <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  auc.prop.10.15 <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  auc.07.19 <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  sd.07.19 <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  auc.prop.07.19 <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  auc.night <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  cos.sim.index <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
 
   for (j in 1:(nrow(raw.trans)-8)){
 
@@ -1103,21 +1108,21 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   ### Each feature set: dim(length(unq.dts) x (nrow(raw.trans)-8)) ###
 
   ## Prepare data for 'each feature'
-  maxET <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  slope.maxET.6 <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  slope.07maxET <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  slope.00.07 <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  slope.19.2345 <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  curvmaxET <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  total.auc <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  auc.10.15 <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  sd.10.15 <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  auc.prop.10.15 <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  auc.07.19 <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  sd.07.19 <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  auc.prop.07.19 <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  auc.night <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
-  cos.sim.index <- as.data.frame(matrix(nr = (nrow(raw.trans)-8), nc = length(unq.dts)))
+  maxET <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  slope.maxET.6 <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  slope.07maxET <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  slope.00.07 <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  slope.19.2345 <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  curvmaxET <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  total.auc <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  auc.10.15 <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  sd.10.15 <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  auc.prop.10.15 <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  auc.07.19 <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  sd.07.19 <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  auc.prop.07.19 <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  auc.night <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
+  cos.sim.index <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
 
   for (j in 1:(nrow(raw.trans)-8)){
 

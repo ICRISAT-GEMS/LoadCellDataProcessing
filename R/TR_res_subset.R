@@ -22,7 +22,7 @@
 #'
 #' @examples
 #'
-#' Later
+#' # Later
 #'
 #'
 #' @export

@@ -7,13 +7,25 @@ Author: Soumyashree Kar[aut, cre], ICRISAT-GEMS [aut, ctb]
 Maintainer: ICRISAT-GEMS <vincent.garin6@gmail.com>, Soumyashree Kar <ksoumya2301@gmail.com>
 Description: Functions to process the load cell data from the LeasyScan HTP platform and compute parameters describing the transpiration of the genotypes evaluated on the platform.
 License: GPL-3
-Imports: easypackages, readxl, hms, xts, dplyr, mgcv,
-        PerformanceAnalytics, signal, tidyverse, zoo, h2o, sqldf,
-        ggplot2, plyr, lubridate, BioFTF, plantecophys, highfrequency,
-        stringr, nonlinearTseries, tsfeatures, splitstackshape
+Imports:
+        BioFTF,
+        dplyr,
+        ggplot2,
+        highfrequency,
+        lubridate,
+        psych,
+        mgcv,
+        PerformanceAnalytics,
+        splitstackshape,
+        tsfeatures,
+        h2o,
+        plyr,
+        nonlinearTseries,
+        xts,
+        zoo
 Depends: R(>= 3.5)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
 NeedsCompilation: no
-Packaged: 2021-07-08 08:12:33 UTC; gebruiker
+Packaged: 2021-07-08 08:12:33 UTC

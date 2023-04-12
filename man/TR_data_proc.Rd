@@ -171,7 +171,7 @@ lastDate = '2018-03-06', skew_test = FALSE, res_path = getwd())
 
 }
 \references{
-Kar, S., Tanaka, R., Korbu, L. B., Kholová, J., Iwata, H., Durbha, S. S., ...
+Kar, S., Tanaka, R., Korbu, L. B., Kholova, J., Iwata, H., Durbha, S. S., ...
 & Vadez, V. (2020). Automated discretization of ‘transpiration restriction
 to increasing VPD’features from outdoors high-throughput phenotyping data.
 Plant methods, 16(1), 1-20.
