@@ -30,12 +30,6 @@ extractRawLCmatrix <- function(x, y, z) {
   # find mode of the length vector: unq.sec.dates.ln and remove sectors less than mode
   sec.dtLen <- data.frame(sec = unq.secs, dt.len = unq.sec.dates.ln)
 
-  # create function to calculate mode:
-  getmode <- function(v) {
-    uniqv <- unique(v)
-    uniqv[which.max(tabulate(match(v, uniqv)))]
-  }
-
   max.dt <- as.numeric(getmode(sec.dtLen$dt.len))
 
   # select from Metadata: "unit", "old_unit", "Genotype, "G..Alias", "Replicates"
@@ -154,11 +148,21 @@ extractRawLCmatrix <- function(x, y, z) {
   # First ensure column indices of 'TS.n', 'unit', 'mass' from "m.lc.df" dataframe and then execute the loop
   for (n in 1:(nrow(sec.dtLen)))
   {
-    tmp.lc <- m.lc.df[(m.lc.df$unit == sec.dtLen$sec[n] &
-
-                         (m.lc.df$date < L.dt && m.lc.df$TS.n > m.lc.df$TS.n[1] - hms("00:15:00"))),
-
-                      c(10, 1, 6)] #('TS.n', 'unit', 'mass')
+    
+    test_0 <- m.lc.df$unit == sec.dtLen$sec[n] # select a specific sector
+    test_1 <- m.lc.df$date < L.dt              # select point before last day of experiment
+    test_2 <- m.lc.df$TS.n > m.lc.df$TS.n[1] - hms("00:15:00") # select points with time
+    # test_glb <- test_0 & (test_1 && test_2) # original potentially tautological or wrong
+    test_glb <- test_0 & (test_1[1] && test_2[1]) # modified to remove warnings
+    
+    tmp.lc <- m.lc.df[test_glb, c(10, 1, 6)]
+    
+    # original code
+    # tmp.lc <- m.lc.df[(m.lc.df$unit == sec.dtLen$sec[n] &
+    # 
+    #                      (m.lc.df$date < L.dt && m.lc.df$TS.n > m.lc.df$TS.n[1] - hms("00:15:00"))),
+    # 
+    #                   c(10, 1, 6)] #('TS.n', 'unit', 'mass')
 
     df <- merge(x = tmp.lc, y = TS_ALL, by = "TS.n", all = TRUE) # perform outer join to merge by id=TS.n
 
@@ -174,7 +178,7 @@ extractRawLCmatrix <- function(x, y, z) {
 
   b <- Sys.time()
 
-  print(paste0("Loadcell matrix created in: ", round((b-a), 2), " minutes"))
+  print(paste0("Loadcell matrix created in: ", round((b-a), 2)))
 
   list(LC.MAT.f = LC.MAT.f, LC_tsmeta = sec.dtLenMETA.FullUnits)
 }

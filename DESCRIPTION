@@ -29,3 +29,6 @@ LazyData: true
 RoxygenNote: 7.2.3
 NeedsCompilation: no
 Packaged: 2021-07-08 08:12:33 UTC
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3

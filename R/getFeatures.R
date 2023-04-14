@@ -89,14 +89,14 @@ getFeatures <- function(x) {
         maxET <- unique(data.tmp$Dmax) 
         if (maxET > 0.0) {etmax.loc <- min(which.max(data.tmp$Data))
         F.mat.list[[j]][i,1] <- maxET} else {F.mat.list[[j]][i,1] <- 0.0}
-        print("Feature #1: over")
+        # print("Feature #1: over")
         
         #2: slope.maxET-6
         if (maxET > 0.0 & etmax.loc > 5){d.tmp<-data.frame(x = 1:6, y = data.tmp$Data[(etmax.loc-5):etmax.loc])
         mod <- lm(y~x, d.tmp, na.action=na.exclude)
         slope.maxET.6 <- mod$coefficients[2] 
         F.mat.list[[j]][i,2] <- slope.maxET.6} else {F.mat.list[[j]][i,2] <- 0.0}
-        print("Feature #2: over")
+        # print("Feature #2: over")
         
         #3: slope.07-maxET
         et.07.loc <- which(hms(data.tmp$time) == hms("07:00:00"))
@@ -104,7 +104,7 @@ getFeatures <- function(x) {
         mod1 <- lm(y1~x1, d.tmp1, na.action=na.exclude)
         slope.07.maxET <- mod1$coefficients[2] 
         F.mat.list[[j]][i,3] <- slope.07.maxET} else {F.mat.list[[j]][i,3] <- 0.0}
-        print("Feature #3: over")
+        # print("Feature #3: over")
         
         #4: slope.00-07
         et.00.loc <- which(hms(data.tmp$time) == hms("00:00:00"))
@@ -112,7 +112,7 @@ getFeatures <- function(x) {
         mod2 <- lm(y2~x2, d.tmp2, na.action=na.exclude)
         slope.00.07 <- mod2$coefficients[2]
         F.mat.list[[j]][i,4] <- slope.00.07
-        print("Feature #4: over")
+        # print("Feature #4: over")
         
         #5: slope.19-23:45
         et.19.loc <- which(hms(data.tmp$time) == hms("19:00:00"))
@@ -121,12 +121,12 @@ getFeatures <- function(x) {
         mod3 <- lm(y3~x3, d.tmp3, na.action=na.exclude)
         slope.19.2345 <- mod3$coefficients[2]
         F.mat.list[[j]][i,5] <- slope.19.2345
-        print("Feature #5: over")
+        # print("Feature #5: over")
         
         #6: "curvmaxET"
         if (length(unique(data.tmp$Data)) > 1) {tsf <- tsfeatures(data.tmp$Data)
         F.mat.list[[j]][i,6] <- tsf$curvature} else {F.mat.list[[j]][i,6] <- 0.0}
-        print("Feature #6: over")
+        # print("Feature #6: over")
         
         ## Calculate- "total.auc","auc.10-15", "sd.10-15", "auc.prop.10-15", "auc.07-19", "sd.07-19",  
         # "auc.prop.07-19", "auc.night", "cos.sim.index"
@@ -135,7 +135,7 @@ getFeatures <- function(x) {
         tot.auc <-sum(data.tmp$Data[1]/2, sum(data.tmp$Data[ 2 : (nrow(data.tmp) - 1)]),
                       data.tmp$Data[nrow(data.tmp)]/2)
         F.mat.list[[j]][i,7] <- tot.auc
-        print("Feature #7: over")
+        # print("Feature #7: over")
         
         #8: auc.10-15 
         y1.10 <- which(hms(data.tmp$time) == hms("10:00:00"))
@@ -143,17 +143,17 @@ getFeatures <- function(x) {
         auc.10.15 <- sum(data.tmp$Data[y1.10]/2, sum(data.tmp$Data[(y1.10 + 1) : (y1.15 - 1)]),
                          data.tmp$Data[y1.15]/2)
         F.mat.list[[j]][i,8] <- auc.10.15
-        print("Feature #8: over")
+        # print("Feature #8: over")
         
         #9: sd.10-15 
         sd.10.15 <- sd(data.tmp$Data[(y1.10) : (y1.15)])
         F.mat.list[[j]][i,9] <- sd.10.15
-        print("Feature #9: over")
+        # print("Feature #9: over")
         
         #10: auc.prop.10-15
         auc.prop.10.15 <- (auc.10.15/tot.auc)
         F.mat.list[[j]][i,10] <- auc.prop.10.15
-        print("Feature #10: over")
+        # print("Feature #10: over")
         
         #11: auc.07-19
         y1.07 <- which(hms(data.tmp$time) == hms("07:00:00"))
@@ -161,29 +161,29 @@ getFeatures <- function(x) {
         auc.07.19 <- sum(data.tmp$Data[y1.07]/2, sum(data.tmp$Data[(y1.07 + 1) : (y1.19 - 1)]),
                          data.tmp$Data[y1.19]/2)
         F.mat.list[[j]][i,11] <- auc.07.19
-        print("Feature #11: over")
+        # print("Feature #11: over")
         
         #12: sd.07-19
         sd.07.19 <- sd(data.tmp$Data[(y1.07) : (y1.19)])
         F.mat.list[[j]][i,12] <- sd.07.19
-        print("Feature #12: over")
+        # print("Feature #12: over")
         
         #13: auc.prop.07-19 
         auc.prop.07.19 <- (auc.07.19/tot.auc)
         F.mat.list[[j]][i,13] <- auc.prop.07.19
-        print("Feature #13: over")
+        # print("Feature #13: over")
         
         #14: auc.night 
         auc.night <- tot.auc-auc.07.19
         F.mat.list[[j]][i,14] <- auc.night
-        print("Feature #14: over")
+        # print("Feature #14: over")
         
         #15: cos.sim.index
         A = data.tmp$ETref
         B = data.tmp$Data
         cos.sim.index <- sum(A*B)/sqrt(sum(A^2)*sum(B^2)) # cosine similarity function
         F.mat.list[[j]][i,15] <- cos.sim.index
-        print("Feature #15: over")
+        # print("Feature #15: over")
         
         
         ## Get the average of weather parameters
@@ -211,7 +211,7 @@ getFeatures <- function(x) {
         weather.DAT[i,14] <- evn.avg_SR <- mean(data.tmp$SR[y5.w.loc : y6.w.loc], na.rm = TRUE)
         weather.DAT[i,15] <- evn.avg_WS <- mean(data.tmp$WS[y5.w.loc : y6.w.loc], na.rm = TRUE)
         
-        print(i)
+        # print(i)
       }}
     
     # allFeatures <- as.data.frame(F.mat.list[[j]])

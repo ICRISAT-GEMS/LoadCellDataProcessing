@@ -12,8 +12,7 @@ TR_data_proc(
   lastDate = NULL,
   irrg.dts = NULL,
   skew_test = TRUE,
-  get_feature_h2 = FALSE,
-  res_path = NULL
+  get_feature_h2 = FALSE
 )
 }
 \arguments{
@@ -88,8 +87,6 @@ should be used to filter weather data. Default = TRUE.}
 
 \item{get_feature_h2}{\code{Logical value} specifying if the heritability
 of the features (using gam function) should be calculated? Default = FALSE.}
-
-\item{res_path}{path location where the results will be saved. Default = NULL.}
 }
 \value{
 Return:
@@ -165,7 +162,7 @@ data(sensor_data)
 
 TR_res <- TR_data_proc(lc_data = lc_data, pe_data = pe_data,
 wth_data = wth_data, sensor_data = sensor_data,
-lastDate = '2018-03-06', skew_test = FALSE, res_path = getwd())
+lastDate = '2018-03-06', skew_test = FALSE)
 
 }
 

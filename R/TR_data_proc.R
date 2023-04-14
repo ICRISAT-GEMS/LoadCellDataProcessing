@@ -110,7 +110,7 @@
 #' @param get_feature_h2 \code{Logical value} specifying if the heritability
 #' of the features (using gam function) should be calculated? Default = FALSE.
 #' 
-#' @param res_path path location where the results will be saved. Default = NULL.
+# #' @param res_path path location where the results will be saved. Default = NULL.
 #' 
 #' @return Return:
 #' 
@@ -158,7 +158,7 @@
 #' 
 #' TR_res <- TR_data_proc(lc_data = lc_data, pe_data = pe_data,
 #' wth_data = wth_data, sensor_data = sensor_data,
-#' lastDate = '2018-03-06', skew_test = FALSE, res_path = getwd())
+#' lastDate = '2018-03-06', skew_test = FALSE)
 #' 
 #' }
 #' 
@@ -219,7 +219,7 @@
 
 TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
                          sensor_data = NULL, lastDate = NULL,
-                         irrg.dts = NULL, skew_test = TRUE, get_feature_h2 = FALSE, res_path = NULL){
+                         irrg.dts = NULL, skew_test = TRUE, get_feature_h2 = FALSE){
   
   
   # Check the function arguments format and make some adaptations
@@ -315,20 +315,20 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   
   #### result path
   
-  if(is.null(res_path)){
-    
-    stop('You must provide a location path were the results will be saved.')
-    
-  }
-  
-  if(!file.exists(res_path)){
-    
-    stop("'output.loc' is not a valid path")
-    
-  }
-  
-  res_path <- file.path(res_path, 'TR_results')
-  dir.create(res_path)
+  # if(is.null(res_path)){
+  #   
+  #   stop('You must provide a location path were the results will be saved.')
+  #   
+  # }
+  # 
+  # if(!file.exists(res_path)){
+  #   
+  #   stop("'output.loc' is not a valid path")
+  #   
+  # }
+  # 
+  # res_path <- file.path(res_path, 'TR_results')
+  # dir.create(res_path)
   
   
   #############
@@ -408,50 +408,50 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   
   LC.MAT.f <- LC.MAT.OP$LC.MAT.f
   LC.MAT.TSinfo <- LC.MAT.OP$LC_tsmeta
-  
+
   # Add metadata to LC matrix #
   # select from Metadata: "unit", "old_unit", "Genotype, "G..Alias", "Replicates"
-  meta.d.LCmat <- meta.d.sp[meta.d.sp$unit %in% colnames(LC.MAT.f)[-1], 
-                            c(1,2,6,7,8)] 
-  
+  meta.d.LCmat <- meta.d.sp[meta.d.sp$unit %in% colnames(LC.MAT.f)[-1],
+                            c(1,2,6,7,8)]
+
   LC.MAT.f.t <- as.data.frame(t(LC.MAT.f))
-  
+
   colnames(LC.MAT.f.t) <- LC.MAT.f$TS
-  
+
   LC.MAT.f.t <- LC.MAT.f.t[-1,]
-  
+
   # reorder rows of 'meta.d.sp' according to rownames/unit of LC.MAT.f.t
   meta.LCDF <- meta.d.LCmat[order(match(meta.d.LCmat$unit, rownames(LC.MAT.f.t))), ]
-  
+
   LC.MAT.raw <- as.data.frame(cbind(meta.LCDF, LC.MAT.f.t))
-  
+
   ### write.csv(LC.MAT.raw, paste0(opPATH, "LCraw_wNA.csv"))
-  
-  
+
+
   # Start outlier detection, removal and imputation of LC Matric to generate ETr profiles #
   # Pre-process raw LC data: outliers removal and imputation #
   imputed.DF.final <- curateRawLC(x = LC.MAT.f, y = meta.LCDF,
                                   col_names = colnames(LC.MAT.raw))
-  
+
   ### write.csv(imputed.DF.final, paste0(opPATH, "LC_olrm_imputed.csv"))
-  
-  
+
+
   # Identify the highly extreme valued sectors #
   err.sec.info <- filterLCExtremeCols(x = imputed.DF.final, y = meta.LCDF)
-  
-  
+
+
   err.sec.nm <- err.sec.info$err.sec.NM
-  
+
   err.sec.meta <- err.sec.info$err.sec.META
-  
+
   ### write.csv(err.sec.meta, paste0(opPATH, "LCimp_errorUnits.csv"))
-  
-  
+
+
   # Remove the err.cols i.e. sectors with extreme values
   imp_data_sec_rem <- imputed.DF.final[!imputed.DF.final$unit %in% err.sec.nm, ]
-  
+
   ### write.csv(imp_data_sec_rem, paste0(opPATH, "LCimp_ETr_IP.csv"))
-  
+
   # Generate ETr profiles from "imp_data_sec_rem" dataframe #
   et.vals <- getETr(x = imp_data_sec_rem)
 
@@ -488,7 +488,7 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
 
   # plot(y = ETr_Meta_ERRsec.rmvd[3, 7:dim(ETr_Meta_ERRsec.rmvd)[2]],
   #      x = 1:(dim(ETr_Meta_ERRsec.rmvd)[2]-6), type = 'l')
-  # 
+  #
   # plot(y = ETr_Meta[3, 6:dim(ETr_Meta)[2]],
   #      x = 1:(dim(ETr_Meta)[2]-5), type = 'l')
 
@@ -892,18 +892,18 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   rownames(F.He) <- unq.dts
 
   # For now, do not save features per day.
-  
-  if(get_feature_h2){ 
-    
+
+  if(get_feature_h2){
+
     # featureHeRES <- getFeatureHe(x = allFeatures, y = raw.trans, d = unq.dts, p = opPATH.raw)
     featureHeRES <- getFeatureHe(x = allFeatures, y = raw.trans, d = unq.dts,
                                  F.He = F.He)
-    
+
     ### write.csv(featureHeRES, paste0(opPATH, "rawTr_featureH2.csv"))
-    
+
     }
 
- 
+
 
   ### save all features as feature Time Series ###
   ### Each feature set: dim(length(unq.dts) x (nrow(raw.trans)-8)) ###
@@ -1094,16 +1094,16 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   # for now no intermediary saving of all features per day.
 
   # featureHeRES <- getFeatureHe(x = allFeatures, y = smth.trans, d = unq.dts, p = opPATH.smth)
-  
+
   if(get_feature_h2){
-    
+
     featureHeRES <- getFeatureHe(x = allFeatures, y = smth.trans, d = unq.dts,
                                  F.He = F.He)
-    
+
     ### write.csv(featureHeRES, paste0(opPATH, "smthTr_featureH2.csv"))
-    
+
   }
-  
+
   ### save all features as feature Time Series ###
   ### Each feature set: dim(length(unq.dts) x (nrow(raw.trans)-8)) ###
 
