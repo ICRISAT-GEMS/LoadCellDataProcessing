@@ -216,7 +216,7 @@ getFeatures <- function(x) {
     
     # allFeatures <- as.data.frame(F.mat.list[[j]])
     
-    print(paste0("Finished all features of col_index=", j))
+    # print(paste0("Finished all features of col_index=", j))
     Sys.sleep(0.2)
   }
   

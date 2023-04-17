@@ -6,7 +6,7 @@ genThreshVal <- function(x, y) {
   
   for(i in 1:length(unq.dts)){
     
-    print(paste0("Enter date: ", i, " = ", unq.dts[i]))
+    # print(paste0("Enter date: ", i, " = ", unq.dts[i]))
     
     tmp <- baseTW.df[baseTW.df$date == unq.dts[i], ]
     
@@ -29,7 +29,7 @@ genThreshVal <- function(x, y) {
     
     for(j in 2:ncol(mod.tmp)){
       
-      print(paste0("Enter geno: ",j, " = ", colnames(mod.tmp)[j], ", when i = ", i))
+      # print(paste0("Enter geno: ",j, " = ", colnames(mod.tmp)[j], ", when i = ", i))
       
       if(!sum(is.na(mod.tmp[ ,j])) == length(mod.tmp[ ,j]))
       {
@@ -41,7 +41,7 @@ genThreshVal <- function(x, y) {
       
       quantileMAT [j-1, ] <- quantile(mod.tmp[ ,j-1], na.rm = TRUE)
       
-      print(paste0("Exit geno: ",j, " = ", colnames(mod.tmp)[j], ", when i = ", i))
+      # print(paste0("Exit geno: ",j, " = ", colnames(mod.tmp)[j], ", when i = ", i))
     }
     
     threshModelMAT[i, 1]<- median(tmp.mod.coefMAT$Slope, na.rm = TRUE)
@@ -53,7 +53,7 @@ genThreshVal <- function(x, y) {
     threshModelMAT[i, 7]<- median(quantileMAT$`100%`, na.rm = TRUE)
     threshModelMAT[i, 8]<- median(tmp$solarRAD, na.rm = TRUE)
     
-    print(paste0("Exit date - ", i, " = ", unq.dts[i]))
+    # print(paste0("Exit date - ", i, " = ", unq.dts[i]))
   }
   
   return(threshModelMAT)

@@ -194,160 +194,34 @@
 #' @export
 #'
 
-# data(lc_data)
-# data(pe_data)
-# data(wth_data)
-# data(sensor_data)
-# 
-# lastDate <- '2018-03-06'
-# irrg.dts = NULL
-# skew_test = FALSE
-# 
-# res_path <- 'F:/ICRISAT/Phenotyping/Evapotranspiration/results'
-# 
-# # Load all the functions
-# 
-# setwd("F:/ICRISAT/Phenotyping/Evapotranspiration/EZTr-master/functions")
-# 
-# file.sources <-  list.files(pattern="*.R")
-# sapply(file.sources, source, .GlobalEnv)
-# 
-# # load the side functions
-# source('F:/ICRISAT/Phenotyping/Evapotranspiration/scripts/extra_functions.R')
-
-
 
 TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
                          sensor_data = NULL, lastDate = NULL,
                          irrg.dts = NULL, skew_test = TRUE, get_feature_h2 = FALSE){
   
-  
-  # Check the function arguments format and make some adaptations
-  ###############################################################
-  
-  #### lc data
-  
-  # Check the columns names
-  
-  req_var <- c('sector', 'genotype', 'g_alias', 'treatment', 'timestamp', 'Mass..g')
-  
-  if(!identical(colnames(lc_data), req_var)){
-    
-    form_req <- paste(req_var, collapse = ', ')
-    
-    mess_err <- 'The column names of lc_data are not strictly equivalent to the required format:'
-    
-    stop(paste(mess_err, form_req))
-    
-  }
-  
-  colnames(lc_data)[colnames(lc_data) == 'sector'] <- 'unit'
-  
-  #### pe data
-  
-  # Check the columns names
-  
-  req_var <- c('sector', 'genotype', 'replicate', 'timestamp', 'leaf_area')
-  
-  if(!identical(colnames(pe_data), req_var)){
-    
-    form_req <- paste(req_var, collapse = ', ')
-    
-    mess_err <- 'The column names of pe_data are not strictly equivalent to the required format:'
-    
-    stop(paste(mess_err, form_req))
-    
-  }
-  
-  pe.df <- pe_data
+  ##### check function arguments format ----
+  lc_data <- check_lc_data(lc_data)
+  pe.df <- check_pe_data(pe_data)
   rm(pe_data)
-  
-  #### wth data
-  
-  req_var <- c('sensor', 'variable', 'timestamp', 'value')
-  
-  if(!identical(colnames(wth_data), req_var)){
-    
-    form_req <- paste(req_var, collapse = ', ')
-    
-    mess_err <- 'The column names of wth_data are not strictly equivalent to the required format:'
-    
-    stop(paste(mess_err, form_req))
-    
-  }
-  
-  # check the content of variable
-  
-  var_id <- c("Temperature (Â°C)", "Relative humidity (%)",
-              "Windspeed average (m/s)", "Windspeed max (m/s)",        
-              "Solar radiation (W/(s*mÂ²))", "Precipitation (mm)",
-              "Wind direction (Â°)")
-  
-  if(any(!(wth_data$variable[1:100] %in% var_id))){
-    
-    mess_err <- 'some elements of variable in weather file do not correspond to the required items:'
-    req_item <- paste(var_id, collapse = ", ")
-    
-    stop(paste(mess_err, req_item))
-    
-  }
-  
-  clm.df <- wth_data
+  clm.df <- check_wth_data(wth_data)
   rm(wth_data)
+  sensor.unit.df <- check_sensor_data(sensor_data)
+  rm(sensor_data)
   
-  #### sensor data
+  ##### creation of extra variables ----
   
-  req_var <- c('sector', 'sensor')
-  
-  if(!identical(colnames(sensor_data), req_var)){
-    
-    form_req <- paste(req_var, collapse = ', ')
-    
-    mess_err <- 'The column names of sensor_data are not strictly equivalent to the required format:'
-    
-    stop(paste(mess_err, form_req))
-    
-  }
-  
-  
-  sensor.unit.df <- sensor_data
-  
-  
-  #### result path
-  
-  # if(is.null(res_path)){
-  #   
-  #   stop('You must provide a location path were the results will be saved.')
-  #   
-  # }
-  # 
-  # if(!file.exists(res_path)){
-  #   
-  #   stop("'output.loc' is not a valid path")
-  #   
-  # }
-  # 
-  # res_path <- file.path(res_path, 'TR_results')
-  # dir.create(res_path)
-  
-  
-  #############
-  
-  # creation of extra arguments
-  #############################
-  
-  # get the starting and end date of the experiment
-  
-  # Experiment range
+  # get the starting and end date of the experiment (range)
   E_range <- exp_range(lc_data$timestamp)
 
   # be careful to have limit date with second set as 00
   Date1 <- E_range$date_min
   Date2 <- E_range$date_max
   
+  # fix the last date and irrigation date to last date of the experiment
+  # if not provided
   if(is.null(lastDate)){lastDate <- substr(Date2, 1, 10)}
-  
-  if(is.null(irrg.dts)){irrg.dts <- lastDate}
+  if(is.null(irrg.dts)){irrg.dts <- lastDate} 
+  irrg.dts <- as.Date(irrg.dts) # in Date format
 
   # transform the time stamp data into dd-mm-yy hh:ss format
   lc_data$timestamp <- time_format(lc_data$timestamp)
@@ -356,7 +230,7 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   lc_data_unique_plot <- lc_data[match(unique(lc_data$unit),
                                        lc_data$unit), ]
 
-  meta_data <- data.frame(unit = lc_data_unique_plot$unit,
+  meta.d <- data.frame(unit = lc_data_unique_plot$unit,
                           old_unit = lc_data_unique_plot$unit,
                           Experiment = 'Exp',
                           Treatment = lc_data_unique_plot$treatment,
@@ -365,49 +239,27 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
                           G..Alias = lc_data_unique_plot$g_alias,
                           Replicates = NA)
   
-  ################
+  # Include the species ID e.g. 1 for 'Pearl Millet' as per the data
+  meta.d.sp <- meta.d[meta.d$Species==unique(meta.d$Species)[1], ]
   
-  # pre-processing
-  ################
+  ####### Stage-I: Process LC data and generate ETr matrix ----
+  st.time <- Sys.time()
   
   # Get load cells data i.e. weights of sector
   m.lc <- lc_data
   rm(lc_data)
   
-  # Get Genotype and Exp design metadata
-  meta.d <- meta_data
-  rm(meta_data)
-  
-  # Get 3D leaf area values
-  # pe.df <- allData$pe.df
-  
-  # Get the list of species from the metadata
-  species.nm <- unique(meta.d$Species)
-  
-  # Include the species ID e.g. 1 for 'Pearl Millet' as per the data
-  meta.d.sp <- meta.d[meta.d$Species==species.nm[1], ]
-  
-  # Get the dates of irrigation in Date format
-  irrg.dts <- as.Date(irrg.dts)
-  
   # Find sectors with missing metadata
   noEntrySecs <- which(!unique(m.lc$unit) %in% unique(meta.d.sp$unit))
-  
   noEntrySecNms <- unique(m.lc$unit)[noEntrySecs]
   
   # Remove sectors-without-metadata from original loadcells file
   m.lc <- m.lc[! m.lc$unit %in% noEntrySecNms, ]
   
-  ########
-  
-  ####### Stage-I: Process LC data and generate ETr matrix #######
-  st.time <- Sys.time()
-  
   # Extract matrix of loadcell data #
   LC.MAT.OP <- extractRawLCmatrix(x = m.lc, y = meta.d.sp, z = lastDate)
   
   LC.MAT.f <- LC.MAT.OP$LC.MAT.f
-  LC.MAT.TSinfo <- LC.MAT.OP$LC_tsmeta
 
   # Add metadata to LC matrix #
   # select from Metadata: "unit", "old_unit", "Genotype, "G..Alias", "Replicates"
@@ -425,32 +277,18 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
 
   LC.MAT.raw <- as.data.frame(cbind(meta.LCDF, LC.MAT.f.t))
 
-  ### write.csv(LC.MAT.raw, paste0(opPATH, "LCraw_wNA.csv"))
-
-
-  # Start outlier detection, removal and imputation of LC Matric to generate ETr profiles #
+  # Outlier detection, removal and imputation of LC Matric to generate ETr profiles #
   # Pre-process raw LC data: outliers removal and imputation #
   imputed.DF.final <- curateRawLC(x = LC.MAT.f, y = meta.LCDF,
                                   col_names = colnames(LC.MAT.raw))
 
-  ### write.csv(imputed.DF.final, paste0(opPATH, "LC_olrm_imputed.csv"))
-
-
   # Identify the highly extreme valued sectors #
   err.sec.info <- filterLCExtremeCols(x = imputed.DF.final, y = meta.LCDF)
 
-
   err.sec.nm <- err.sec.info$err.sec.NM
-
-  err.sec.meta <- err.sec.info$err.sec.META
-
-  ### write.csv(err.sec.meta, paste0(opPATH, "LCimp_errorUnits.csv"))
-
 
   # Remove the err.cols i.e. sectors with extreme values
   imp_data_sec_rem <- imputed.DF.final[!imputed.DF.final$unit %in% err.sec.nm, ]
-
-  ### write.csv(imp_data_sec_rem, paste0(opPATH, "LCimp_ETr_IP.csv"))
 
   # Generate ETr profiles from "imp_data_sec_rem" dataframe #
   et.vals <- getETr(x = imp_data_sec_rem)
@@ -459,53 +297,28 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
 
   ETr_Meta <- et.vals$obsETr_meta
 
-  ### write.csv(ETr_Meta, paste0(opPATH, "ET_Obs.csv"))
-
-
   # Convert ETr in grams to mm #
   ETr_Meta[, 6:ncol(ETr_Meta)] <- et.obs*4/1000
-
-  ### write.csv(ETr_Meta, paste0(opPATH, "ETmm_Obs.csv"))
-
 
   # Identify error plots from ETr values using the similar method as above #
   ETr_err.sec.info <- filterETrExtremeCols(x = ETr_Meta, y = meta.LCDF)
 
   err.sec.nm <- ETr_err.sec.info$ETr_err.sec.NM
 
-  err.sec.meta <- ETr_err.sec.info$ETr_err.sec.META
-
-  ### write.csv(err.sec.meta,  paste0(opPATH, "ET_Obs_ERR.SEC.nms.csv"))
-
-
   # Remove the err.cols i.e. sectors with extreme values #
   ETr_Meta_ERRsec.rmvd <- ETr_Meta
 
   ETr_Meta_ERRsec.rmvd <- ETr_Meta_ERRsec.rmvd[!ETr_Meta_ERRsec.rmvd$unit %in% err.sec.nm, ]
 
-  ### write.csv(ETr_Meta_ERRsec.rmvd, paste0(opPATH, "ETmm_Obs_FINAL.csv"))
-
-
-  # plot(y = ETr_Meta_ERRsec.rmvd[3, 7:dim(ETr_Meta_ERRsec.rmvd)[2]],
-  #      x = 1:(dim(ETr_Meta_ERRsec.rmvd)[2]-6), type = 'l')
-  #
-  # plot(y = ETr_Meta[3, 6:dim(ETr_Meta)[2]],
-  #      x = 1:(dim(ETr_Meta)[2]-5), type = 'l')
-
-
-  ##### END ######
-
-  ####### Stage-II: Process Weather data to obtain ETref and ETr ratio matrix #######
+  ####### Stage-II: Process Weather data to obtain ETref and ETr ratio matrix ----
 
   clm.df.mapped <- clm.df[clm.df$sensor %in% sensor.unit.df$sensor, ]
   unq.clm.var <- unique(clm.df.mapped$variable)
-
 
   # Extract weather variables individually; Assign numbers appropriately #
   temperature.DF <- extractWthrVar(y = clm.df.mapped, sel_wth_var = unq.clm.var[1],
                                    skew_test = skew_test)
   temperature.DF$ts <- temperature.DF$ts + 5.5*60*60
-
 
   relHUM.DF <- extractWthrVar(y = clm.df.mapped, sel_wth_var = unq.clm.var[2],
                               skew_test = skew_test)
@@ -529,7 +342,6 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
 
   dates <- seq(Date1, Date2, by="min")
 
-
   # Subset weather data #
   temperature.DF.filt <- subset(temperature.DF, ts %in% dates)
   relHUM.DF.filt <- subset(relHUM.DF, ts %in% dates)
@@ -542,7 +354,7 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
 
   names(weather.DF) <- c("TS", "Temp", "RH", "VPD", "SR", "WS")
 
-  weather.DF[,1]<-dates
+  weather.DF[, 1]<-dates
 
   i<-nrow(weather.DF)
   pbar <- create_progress_bar('text')
@@ -570,30 +382,22 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
     pbar$step()
   }
 
-  # Subset the weather data that have some information
-  # weather.DF <- weather.DF[!is.na(weather.DF$Temp), ]
-
-  ### write.csv(weather.DF, paste0(opPATH, "RAW_weather.TS_5.5.csv"))
-
 
   # Preprocess each weather variable except VPD #
-  weather.DF[ ,2] <- prepcsWthr(x = weather.DF, y = 2) # temperature
-  weather.DF[ ,3] <- prepcsWthr(x = weather.DF, y = 3) # relative humidity
-  weather.DF[ ,5] <- prepcsWthr(x = weather.DF, y = 5) # solar radiation
-  weather.DF[ ,6] <- prepcsWthr(x = weather.DF, y = 6) # wind speed
+  weather.DF[ , 2] <- prepcsWthr(x = weather.DF, y = 2) # temperature
+  weather.DF[ , 3] <- prepcsWthr(x = weather.DF, y = 3) # relative humidity
+  weather.DF[ , 5] <- prepcsWthr(x = weather.DF, y = 5) # solar radiation
+  weather.DF[ , 6] <- prepcsWthr(x = weather.DF, y = 6) # wind speed
 
   #### VPD calculation
 
   # Compute VPD and insert into the weather DF #
   SVP <- 610.7*(10^(7.5*weather.DF[ ,2]/(237.3+weather.DF[ ,2])))
   VPD <- ((1 - (weather.DF[ ,3]/100))*SVP)/1000
-  weather.DF[ ,4] <- VPD
-
-  ### write.csv(weather.DF, paste0(opPATH, "prepcs_weather.TS_5.5.csv"))
+  weather.DF[ , 4] <- VPD
 
   wthr.DFxts.TS <- xts(weather.DF, order.by = as.POSIXct(weather.DF$TS, format="%Y-%m-%d %H:%M"))
 
-  # wthr.DFagg15min = highfrequency::aggregateTS(ts = wthr.DFxts.TS, on="minutes",k=15, dropna=TRUE)
   wthr.DFagg15min = highfrequency::aggregateTS(ts = wthr.DFxts.TS, alignBy ="minutes",
                                                alignPeriod =15, dropna=TRUE)
 
@@ -610,9 +414,6 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   et.obs.TS.chr <- as.character(et.obs.TS)
   wthr.DFagg15min_t <- wthr.DFagg15min[wthr.DFagg15min$TS %in% et.obs.TS.chr, ]
 
-  ### write.csv(wthr.DFagg15min, paste0(opPATH, "weather.DF.agg15min_5.5.csv"))
-
-
   # Calculate Penman Monteith ET #
   wthr.df1 <- calculateETref(wthr.DFagg15min)
   wthr.ETref.df <- as.data.frame(wthr.df1)
@@ -623,67 +424,12 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   colnames(empty.MAT.wthr.ETref) <- colnames(et.obs)
   wthr.ETref.ETobs <- as.data.frame(rbind(empty.MAT.wthr.ETref, et.obs))
 
-  ### write.csv(wthr.ETref.ETobs, paste0(opPATH, "wthr.ETref.ETobs.csv"))
-
-
   ### Start ET0 Ratio-based Thresholding ###
   ET_ratio_mat <- generateETrRatio(x = wthr.ETref.ETobs)
-
-  ### write.csv(ET_ratio_mat, paste0(opPATH, "wthr.ETref.ETobs.Ratio.csv"))
-
   ETr_baseFILE <- wthr.ETref.ETobs
   baseFILE <- ET_ratio_mat
 
-  # filtering the days on which irrigation was done
-  #################################################
-
-  # # Make the original date sequence in the LC time series from which irrg. dates will be filtered
-  # act.dts <- seq(date(wthr.DFagg15min$TS[1]), date(wthr.DFagg15min$TS[nrow(wthr.DFagg15min)]), 1)
-  #
-  # act.dts.ts <- rep(act.dts, each = 96)
-  #
-  # # problem with this piece of code
-  # # act.dts.ts.df <- data.frame(org.dts.ts = c(rep(NA,
-  # #                                                (ncol(ETr_baseFILE) - length(act.dts.ts))),
-  # #                                            as.character(act.dts.ts)))
-  #
-  # empt_space <- tryCatch(rep(NA, (ncol(ETr_baseFILE) - length(act.dts.ts))),
-  #                        error = function(e) NULL)
-  #
-  # if(!is.null(empt_space)){
-  #
-  #   act.dts.ts.df <- data.frame(org.dts.ts = c(rep(NA,
-  #                                                  (ncol(ETr_baseFILE) - length(act.dts.ts))),
-  #                                              as.character(act.dts.ts)))
-  #
-  #
-  # } else {
-  #
-  #   act.dts.ts.df <- data.frame(org.dts.ts = as.character(act.dts.ts))
-  #
-  # }
-  #
-  #
-  # act.dts.ts.df$org.dts.ts <- as.Date(act.dts.ts.df$org.dts.ts)
-  #
-  # rownames(act.dts.ts.df) <- colnames(ETr_baseFILE)
-  #
-  # # Identify columns from ETr raw data which need to be filtered
-  # irrg.cols <- which(act.dts.ts.df$org.dts.ts %in% irrg.dts)
-  #
-  #
-  #
-  # # Prepare a copy of raw data as the Input File for the Smoothing process
-  # ETr_smth_IP <- ETr_baseFILE
-  # Ratio_smth_IP<- baseFILE
-  #
-  # ETr_smth_IP <- ETr_smth_IP[ ,-irrg.cols]
-  # Ratio_smth_IP <- Ratio_smth_IP[ ,-irrg.cols]
-
-  ######
-
-  # Alternative way to filter the days with irrigation
-  #################################################
+  # correct for irrigation (alternative way compare to the previous version)
 
   # Prepare a copy of raw data as the Input File for the Smoothing process
   ETr_smth_IP <- ETr_baseFILE
@@ -704,12 +450,9 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
 
   sel_col <- c(meta_inf_pos, date_pos[sel_dates])
 
-
   # remove the information that fall on a day with irrigation
-  ETr_smth_IP <- ETr_smth_IP[ ,sel_col]
-  Ratio_smth_IP <- Ratio_smth_IP[ ,sel_col]
-
-  ######
+  ETr_smth_IP <- ETr_smth_IP[ , sel_col]
+  Ratio_smth_IP <- Ratio_smth_IP[ , sel_col]
 
 
   # Thresholding using 2 time-windows 06:30 to 18:30 and remaining #
@@ -765,10 +508,6 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   TW1.thresh <- floor(median(baseTW1_ThreshVALS$Q_75, na.rm = TRUE))
   TW2.thresh <- ceiling(median(baseTW2_ThreshVALS$Q_75, na.rm = TRUE))
 
-  ### write.csv(baseTW1_ThreshVALS, paste0(opPATH, "ETrRatio_TW1_ThreshVALS.csv"))
-  ### write.csv(baseTW2_ThreshVALS, paste0(opPATH, "ETrRatio_TW2_ThreshVALS.csv"))
-
-
   # 4. Make ETr partitions
   ETr_TWs <- dataPART(x = ETr_smth_IP)
 
@@ -802,9 +541,6 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
 
   ETr_filt_FILE[9:nrow(ETr_filt_FILE), 6:ncol(ETr_filt_FILE)] <- subs.d
 
-  ### write.csv(ETr_filt_FILE, paste0(opPATH, "ETr_Thresh_Filt.csv"))
-
-
   # 5. Thresholded/Filtered ETr interpolation
   ETr_filt_imputed_FILE <- ETr_filt_FILE
   subs.d.imp <- subs.d
@@ -815,11 +551,9 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
     subs.d.imp[i, ] <- na.aggregate.default(subs.d.imp[i, ])
     na.sum[i] <- sum(is.na(subs.d.imp[i, ]))
   }
-  print(paste0("#Sectors still with NA: ", (length(na.sum) - length(!na.sum == 0))))
+  # print(paste0("#Sectors still with NA: ", (length(na.sum) - length(!na.sum == 0))))
 
   ETr_filt_imputed_FILE[9:nrow(ETr_filt_imputed_FILE), 6:ncol(ETr_filt_imputed_FILE)] <- subs.d.imp
-
-  ### write.csv(ETr_filt_imputed_FILE, paste0(opPATH, "ETr_Thresh_Impt.csv"))
 
   ### Start Tr extraction to get raw Tr profiles ###
   # Check format and set TS
@@ -862,21 +596,11 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   Tr_OP <- calculateTr(x = ETr_filt_imputed_FILE, y = pe.df.ETr, z = LAI.mat,
                        d = unq.dts, LAI.all.dates = LAI.all.dates)
 
-  raw.trans.mat <- Tr_OP$Trans.mat
-
-  LA3D.all.dates <- Tr_OP$LA3D_TS
-
   LAI.mat <- Tr_OP$LAI.mat
 
   raw.trans <- ETr_filt_imputed_FILE
 
-  raw.trans[9:nrow(raw.trans), 6:ncol(raw.trans)] <- raw.trans.mat
-
-  ### write.csv(raw.trans, paste0(opPATH, "raw_Tr.csv"))
-
-  ### write.csv(LA3D.all.dates, paste0(opPATH, "3DLA_TS.csv"))
-
-  ### write.csv(LAI.mat, paste0(opPATH, "LAI_TS.csv"))
+  raw.trans[9:nrow(raw.trans), 6:ncol(raw.trans)] <- Tr_OP$Trans.mat
 
 
   ### Feature Extraction of RAW Transpiration Data ###
@@ -898,8 +622,6 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
     # featureHeRES <- getFeatureHe(x = allFeatures, y = raw.trans, d = unq.dts, p = opPATH.raw)
     featureHeRES <- getFeatureHe(x = allFeatures, y = raw.trans, d = unq.dts,
                                  F.He = F.He)
-
-    ### write.csv(featureHeRES, paste0(opPATH, "rawTr_featureH2.csv"))
 
     }
 
@@ -1005,68 +727,13 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   sim_ETobs_ETPenMont_raw <- as.data.frame(cbind(raw.trans[9:nrow(raw.trans), 1:5], cos.sim.index))
 
 
-  # Possibility to save the features results
-  ##########################################
-
-  # write.csv(as.data.frame(cbind(raw.trans[9:nrow(raw.trans), 1:5], maxET)),
-  #           paste0(opPATH.raw, "maxET.csv"))
-  #
-  # write.csv(as.data.frame(cbind(raw.trans[9:nrow(raw.trans), 1:5], slope.maxET.6)),
-  #           paste0(opPATH.raw, "slope.maxET.6.csv"))
-  #
-  # write.csv(as.data.frame(cbind(raw.trans[9:nrow(raw.trans), 1:5], slope.00.07)),
-  #           paste0(opPATH.raw, "slope.00.07.csv"))
-  #
-  # write.csv(as.data.frame(cbind(raw.trans[9:nrow(raw.trans), 1:5], slope.07maxET)),
-  #           paste0(opPATH.raw, "slope.07maxET.csv"))
-  #
-  # write.csv(as.data.frame(cbind(raw.trans[9:nrow(raw.trans), 1:5], slope.19.2345)),
-  #           paste0(opPATH.raw, "slope.19.2345.csv"))
-  #
-  # write.csv(as.data.frame(cbind(raw.trans[9:nrow(raw.trans), 1:5], curvmaxET)),
-  #           paste0(opPATH.raw, "curvmaxET.csv"))
-  #
-  # write.csv(as.data.frame(cbind(raw.trans[9:nrow(raw.trans), 1:5], total.auc)),
-  #           paste0(opPATH.raw, "total.auc.csv"))
-  #
-  # write.csv(as.data.frame(cbind(raw.trans[9:nrow(raw.trans), 1:5], auc.10.15)),
-  #           paste0(opPATH.raw, "auc.10.15.csv"))
-  #
-  # write.csv(as.data.frame(cbind(raw.trans[9:nrow(raw.trans), 1:5], sd.10.15)),
-  #           paste0(opPATH.raw, "sd.10.15.csv"))
-  #
-  # write.csv(as.data.frame(cbind(raw.trans[9:nrow(raw.trans), 1:5], auc.prop.10.15)),
-  #           paste0(opPATH.raw, "auc.prop.10.15.csv"))
-  #
-  # write.csv(as.data.frame(cbind(raw.trans[9:nrow(raw.trans), 1:5], auc.07.19)),
-  #           paste0(opPATH.raw, "auc.07.19.csv"))
-  #
-  # write.csv(as.data.frame(cbind(raw.trans[9:nrow(raw.trans), 1:5], sd.07.19)),
-  #           paste0(opPATH.raw, "sd.07.19.csv"))
-  #
-  # write.csv(as.data.frame(cbind(raw.trans[9:nrow(raw.trans), 1:5], auc.prop.07.19)),
-  #           paste0(opPATH.raw, "auc.prop.07.19.csv"))
-  #
-  # write.csv(as.data.frame(cbind(raw.trans[9:nrow(raw.trans), 1:5], auc.night)),
-  #           paste0(opPATH.raw, "auc.night.csv"))
-  #
-  # write.csv(as.data.frame(cbind(raw.trans[9:nrow(raw.trans), 1:5], cos.sim.index)),
-  #           paste0(opPATH.raw, "cos.sim.index.csv"))
-
-  #########
-
-  #########
-
-  ###### Stage III: Generate smooth ETr and obtain smooth Tr features ######
+  ###### Stage III: Generate smooth ETr and obtain smooth Tr features ----
   # ETr smoothing
   smoothETrMAT <- smoothETr(x = subs.d.imp)
 
   # ETr smooth profiles per load cell...
   ETr_smoothFILE <- ETr_filt_imputed_FILE
   ETr_smoothFILE[9:nrow(ETr_smoothFILE) , 6:ncol(ETr_smoothFILE)] <- smoothETrMAT/1000
-
-  ### write.csv(ETr_smoothFILE, paste0(opPATH, "ETr_smth.csv"))
-
 
   # Calculate Tr from smooth ETr
   Tr_OP <- calculateTr(x = ETr_smoothFILE, y = pe.df.ETr, z = LAI.mat, d = unq.dts,
@@ -1076,8 +743,6 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   smth.trans.mat <- Tr_OP$Trans.mat
   smth.trans <- ETr_smoothFILE
   smth.trans[9:nrow(smth.trans), 6:ncol(smth.trans)] <- smth.trans.mat
-
-  ### write.csv(smth.trans, paste0(opPATH, "smth_Tr.csv"))
 
   ### Feature Extraction of SMOOTH Transpiration Data ###
   featuresRES <- getFeatures(x = smth.trans)
@@ -1091,21 +756,17 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
                       "auc.prop.07-19", "auc.night", "cos.sim.index")
   rownames(F.He) <- unq.dts
 
-  # for now no intermediary saving of all features per day.
-
-  # featureHeRES <- getFeatureHe(x = allFeatures, y = smth.trans, d = unq.dts, p = opPATH.smth)
-
   if(get_feature_h2){
 
     featureHeRES <- getFeatureHe(x = allFeatures, y = smth.trans, d = unq.dts,
                                  F.He = F.He)
 
-    ### write.csv(featureHeRES, paste0(opPATH, "smthTr_featureH2.csv"))
-
   }
 
   ### save all features as feature Time Series ###
   ### Each feature set: dim(length(unq.dts) x (nrow(raw.trans)-8)) ###
+  
+  ###FCT: Make a function to process all features matrices
 
   ## Prepare data for 'each feature'
   maxET <- as.data.frame(matrix(nrow = (nrow(raw.trans)-8), ncol = length(unq.dts)))
@@ -1203,58 +864,7 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   # similarity between the ETr profile and the Penman Monteith ET
   sim_ETobs_ETPenMont_smth <- as.data.frame(cbind(smth.trans[9:nrow(smth.trans), 1:5], cos.sim.index))
 
-
-  # possibility to save the features
-  ##################################
-
-  # write.csv(as.data.frame(cbind(smth.trans[9:nrow(smth.trans), 1:5], maxET)),
-  #           paste0(opPATH.smth, "maxET.csv"))
-  #
-  # write.csv(as.data.frame(cbind(smth.trans[9:nrow(smth.trans), 1:5], slope.maxET.6)),
-  #           paste0(opPATH.smth, "slope.maxET.6.csv"))
-  #
-  # write.csv(as.data.frame(cbind(smth.trans[9:nrow(smth.trans), 1:5], slope.00.07)),
-  #           paste0(opPATH.smth, "slope.00.07.csv"))
-  #
-  # write.csv(as.data.frame(cbind(smth.trans[9:nrow(smth.trans), 1:5], slope.07maxET)),
-  #           paste0(opPATH.smth, "slope.07maxET.csv"))
-  #
-  # write.csv(as.data.frame(cbind(smth.trans[9:nrow(smth.trans), 1:5], slope.19.2345)),
-  #           paste0(opPATH.smth, "slope.19.2345.csv"))
-  #
-  # write.csv(as.data.frame(cbind(smth.trans[9:nrow(smth.trans), 1:5], curvmaxET)),
-  #           paste0(opPATH.smth, "curvmaxET.csv"))
-  #
-  # write.csv(as.data.frame(cbind(smth.trans[9:nrow(smth.trans), 1:5], total.auc)),
-  #           paste0(opPATH.smth, "total.auc.csv"))
-  #
-  # write.csv(as.data.frame(cbind(smth.trans[9:nrow(smth.trans), 1:5], auc.10.15)),
-  #           paste0(opPATH.smth, "auc.10.15.csv"))
-  #
-  # write.csv(as.data.frame(cbind(smth.trans[9:nrow(smth.trans), 1:5], sd.10.15)),
-  #           paste0(opPATH.smth, "sd.10.15.csv"))
-  #
-  # write.csv(as.data.frame(cbind(smth.trans[9:nrow(smth.trans), 1:5], auc.prop.10.15)),
-  #           paste0(opPATH.smth, "auc.prop.10.15.csv"))
-  #
-  # write.csv(as.data.frame(cbind(smth.trans[9:nrow(smth.trans), 1:5], auc.07.19)),
-  #           paste0(opPATH.smth, "auc.07.19.csv"))
-  #
-  # write.csv(as.data.frame(cbind(smth.trans[9:nrow(smth.trans), 1:5], sd.07.19)),
-  #           paste0(opPATH.smth, "sd.07.19.csv"))
-  #
-  # write.csv(as.data.frame(cbind(smth.trans[9:nrow(smth.trans), 1:5], auc.prop.07.19)),
-  #           paste0(opPATH.smth, "auc.prop.07.19.csv"))
-  #
-  # write.csv(as.data.frame(cbind(smth.trans[9:nrow(smth.trans), 1:5], auc.night)),
-  #           paste0(opPATH.smth, "auc.night.csv"))
-  #
-  # write.csv(as.data.frame(cbind(smth.trans[9:nrow(smth.trans), 1:5], cos.sim.index)),
-  #           paste0(opPATH.smth, "cos.sim.index.csv"))
-
-  ###############
-
-  ##### END #####
+  #### return results ----
 
   res_raw <- list(TR_raw = raw.trans,
                   Max_TR_raw = Max_TR_raw,
@@ -1295,7 +905,7 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
 
   end.time <- Sys.time()
 
-  print(paste0("Complete processing executed in: ", round((end.time-st.time), 2), " minutes"))
+  print(paste0("Complete processing executed in: ", round((end.time-st.time), 2)))
 
   return(results)
   

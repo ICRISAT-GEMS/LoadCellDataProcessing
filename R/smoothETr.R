@@ -19,8 +19,8 @@ smoothETr <- function(x) {
     
   }
   
-  plot(x=1:ncol(e21ip), y=(e21ip[dim(e21ip)[1], ])/1000, col="black", type="p", main = "An example plot")
-  lines(x=1:ncol(e21ip), y=(e21op[dim(e21ip)[1], ])/1000, col="red")
+  # plot(x=1:ncol(e21ip), y=(e21ip[dim(e21ip)[1], ])/1000, col="black", type="p", main = "An example plot")
+  # lines(x=1:ncol(e21ip), y=(e21op[dim(e21ip)[1], ])/1000, col="red")
   
   return(e21op)
   

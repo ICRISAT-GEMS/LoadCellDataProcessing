@@ -12,7 +12,7 @@ extractWthrVar <- function(y, sel_wth_var, skew_test = TRUE) {
   if (length(sen.cnt) > 2)
   {
     
-    print(paste0(sel_wth_var, " has data from > 2 Sensors"))
+    # print(paste0(sel_wth_var, " has data from > 2 Sensors"))
     
     # Calculate number of elements per sensor and select the top two with the highest number of values
     unq.SENSOR.val.ln <- c() # create vector to store the number of unique Values per sector
@@ -41,7 +41,7 @@ extractWthrVar <- function(y, sel_wth_var, skew_test = TRUE) {
     
   } else if (length(sen.cnt) == 2) {
     
-    print(paste0(sel_wth_var, " has data from 2 sensors"))
+    # print(paste0(sel_wth_var, " has data from 2 sensors"))
     
     sen1 <- wthr.tmp[wthr.tmp$sensor==sen.cnt[1], ]
     
@@ -64,7 +64,7 @@ extractWthrVar <- function(y, sel_wth_var, skew_test = TRUE) {
         wthr.var.DF <- wthr.tmp[wthr.tmp$sensor==sen.cnt[sen.f], ]}
     } else {
       
-    print(paste0(sel_wth_var, " has data from only 1 sensor"))
+    # print(paste0(sel_wth_var, " has data from only 1 sensor"))
     
     wthr.var.DF <- wthr.tmp[wthr.tmp$sensor==sen.cnt[1], ]
   }
