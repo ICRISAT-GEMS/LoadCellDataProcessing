@@ -1,4 +1,5 @@
 getETr <- function(x) {
+  
   data.final.err.rmvd <- as.data.frame(t(x))
   
   # ET values
@@ -13,9 +14,6 @@ getETr <- function(x) {
   {
     data.et[-1,i] <- -diff(data.et.tmp[, i])
   }
-  
-  # Remove outliers from data.et
-  data.RmOut2 <- data.et
   
   et.obs <- as.data.frame(t(data.et))
   

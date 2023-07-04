@@ -99,8 +99,8 @@ the following features organised per genotype and per day
  \item{TR_raw}{Transpiration per genotype and time point (here every 15min)}
  \item{Max_TR_raw}{Maximum transpiration per genotype and per day}
  \item{slope_6pt_bfr_maxTR_raw}{Slope of the curvature between 6 data points (90 min)}
- \item{slope_00_07_raw}{slope of the curve between 00:00 and 07:00}
  \item{slope_07_maxTR_raw}{slope of the curve between 07:00 and maxTR}
+ \item{slope_00_07_raw}{slope of the curve between 00:00 and 07:00}
  \item{slope_19h_23h45_raw}{slope of the curve between 19:00 and 23:45}
  \item{curve_maxTR_raw}{curvature or angle of the curve at maxTR}
  \item{total_auc_raw}{Total area under the curve}

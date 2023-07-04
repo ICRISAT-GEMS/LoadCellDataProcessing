@@ -14,7 +14,7 @@ extractWthrVar <- function(y, sel_wth_var, skew_test = TRUE) {
     
     # print(paste0(sel_wth_var, " has data from > 2 Sensors"))
     
-    # Calculate number of elements per sensor and select the top two with the highest number of values
+    # Calculate number of elements per sensor
     unq.SENSOR.val.ln <- c() # create vector to store the number of unique Values per sector
     unq.SENSOR.valSKW <- c() # create vector to store the kurtosis of values per sector
     
@@ -36,6 +36,8 @@ extractWthrVar <- function(y, sel_wth_var, skew_test = TRUE) {
       
     }
     
+    # selection of the sensor with the largest amount of data.
+    # here if the number of data is equal, we could filter based on the skewness.
     wthr.tmp1 <- wthr.tmp[wthr.tmp$sensor == SENSOR.valLen$SENSOR[1], ]
     wthr.var.DF <- wthr.tmp1
     

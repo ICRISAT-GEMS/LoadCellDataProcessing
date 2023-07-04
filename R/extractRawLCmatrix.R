@@ -84,7 +84,9 @@ extractRawLCmatrix <- function(x, y, z) {
                                           ymd_hm(paste0(sec.dtLen$F.dt[1]," ",'23:45')), by = '15 mins')))
   names(TS_base)[1]<-c("int.val")
 
-  TS_base$time <- strftime(TS_base$int.val, format="%H:%M:%S", tz="UTC")
+  # TS_base$time <- strftime(TS_base$int.val, format="%H:%M:%S", tz="UTC")
+  TS_base$time <- unlist(lapply(X = TS_base$int.val, FUN = strftime,
+                                format="%H:%M:%S", tz="UTC"))
 
   # Since, the hms values slightly differ in the orginal dataset than the ideal 15min interval values,
   # replace them with the TS_base strftime (hms) values
@@ -95,7 +97,7 @@ extractRawLCmatrix <- function(x, y, z) {
   print("Loadcell matrix timestamp mapping status")
 
   i<-nrow(m.lc.df)
-  pbar <- create_progress_bar("text")
+  pbar <- plyr::create_progress_bar("text")
   pbar$init(i)
 
   for(i in 1:nrow(m.lc.df))
@@ -134,6 +136,10 @@ extractRawLCmatrix <- function(x, y, z) {
                                          ymd_hm(paste0(L.dt," ",'23:45')), by = '15 mins')))
 
   names(TS_ALL)[1]<-c("TS.n") # MUST be the same as in original data set m.lc.df
+  
+  # Add manually 00:00:00 to all midnight points
+  TS_ALL$TS.n[which(nchar(TS_ALL$TS.n) == 10)] <-
+    paste(TS_ALL$TS.n[which(nchar(TS_ALL$TS.n) == 10)], '00:00:00')
 
   TS_ALL$TS.n <- ymd_hms(TS_ALL$TS.n)
 
