@@ -26,8 +26,9 @@
              date.mat$val[j] <- NA)  
     }
     
-    date.mat$val <- na.aggregate.default(date.mat$val)
-    # date.mat$val <- na.spline(date.mat$val)
+    date.mat$val <- na.spline(date.mat$val)
+    date.mat$val[date.mat$val < 0] <- 0
+    # date.mat$val <- na.aggregate.default(date.mat$val)
     
     LAI.all.dates[i, ] <- date.mat$val
     
@@ -41,17 +42,9 @@
     # Calculate Transpiration #
     Trans.mat[i, ] <- (1-(1-exp(-0.463*LAI.mat[i, ])))*ETr_smth.mat[i, ] 
     
-    # plot(x=1:length(Trans.mat[i, ]), y=Trans.mat[i, ])
-    # lines(x=1:length(Trans.mat[i, ]), y=ETr_smth.mat[i, ], 
-    #      type = "l", lty = 1, col="red")
-    
     # Calculate Transpiration Rate #
     # TR.mat[i, ] <- (Trans.mat[i, ]/ (LAI.mat[i, ]*0.26*10^4))
     # TR.mat[i, ] <- (Trans.mat[i, ]/ (sec.lai.tmp/100))
-        
-    # plot(x=1:length(TR.mat[i, ]), y=TR.mat[i, ])
-    # lines(x=1:length(TR.mat[i, ]), y=ETr_smth.mat[i, ], 
-    #       type = "l", lty = 1, col="red")
     
   }
   
