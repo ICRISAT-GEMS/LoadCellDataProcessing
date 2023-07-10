@@ -162,20 +162,20 @@
 #' 
 #' }
 #' 
-#' @import BioFTF
+# #' @import BioFTF
 #' @import dplyr
 #' @import ggplot2
 #' @import highfrequency
 #' @import lubridate
-#' @import mgcv
+# #' @import mgcv
 #' @import PerformanceAnalytics
 #' @import reshape2
-#' @import splitstackshape
+# #' @import splitstackshape
 #' @import tsfeatures
 #' @importFrom h2o ifelse
 #' @importFrom grDevices boxplot.stats
 #' @importFrom graphics boxplot lines
-#' @importFrom plyr create_progress_bar
+# #' @importFrom plyr create_progress_bar
 #' @importFrom psych describe
 #' @importFrom nonlinearTseries nonLinearNoiseReduction
 #' @importFrom stats dist lm median na.exclude na.omit quantile sd smooth.spline time ts var

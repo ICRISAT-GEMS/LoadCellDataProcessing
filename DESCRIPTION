@@ -8,18 +8,14 @@ Maintainer: ICRISAT-GEMS <vincent.garin6@gmail.com>, Soumyashree Kar <ksoumya230
 Description: Functions to process the load cell data from the LeasyScan HTP platform and compute parameters describing the transpiration of the genotypes evaluated on the platform.
 License: GPL-3
 Imports:
-    BioFTF,
     dplyr,
     ggplot2,
     highfrequency,
     lubridate,
     psych,
-    mgcv,
     PerformanceAnalytics,
-    splitstackshape,
     tsfeatures,
     h2o,
-    plyr,
     nonlinearTseries,
     xts,
     zoo,
