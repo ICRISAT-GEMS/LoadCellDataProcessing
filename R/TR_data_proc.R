@@ -77,7 +77,7 @@
 #'
 #' \describe{
 #'  \item{\code{sensor}}{a character vector describing the sensor information}
-#'  \item{\code{variable}}{a character vector indicating the type of weather information. Must be one of: Temperature (Â°C), Relative humidity (\%)), Windspeed average (m/s), Windspeed max (m/s), Solar radiation (W/(s*mÂ²)), Precipitation (mm), or Wind direction (Â°).}
+#'  \item{\code{variable}}{a character vector indicating the type of weather information. Must be one of: Temperature (°C), Relative humidity (\%)), Windspeed average (m/s), Windspeed max (m/s), Solar radiation (W/(s*m²)), Precipitation (mm), or Wind direction (°).}
 #'  \item{\code{timestamp}}{a character vector indicating the time of measurement in format yyyy-mm-dd hh:mm:ss.}
 #'  \item{\code{value}}{a numeric vector indicating the variable value.}
 #' }
@@ -169,6 +169,7 @@
 #' @import lubridate
 #' @import mgcv
 #' @import PerformanceAnalytics
+#' @import reshape2
 #' @import splitstackshape
 #' @import tsfeatures
 #' @importFrom h2o ifelse
@@ -180,7 +181,7 @@
 #' @importFrom stats dist lm median na.exclude na.omit quantile sd smooth.spline time ts var
 #' @importFrom utils head
 #' @importFrom xts xts
-#' @importFrom zoo na.aggregate.default na.approx na.locf
+#' @importFrom zoo na.aggregate.default na.approx na.locf na.spline
 # #' @import easypackage
 # #' @import tidyverse
 # #' @import readxl
@@ -363,6 +364,12 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   colnames(weather_DF)[1] <- "TS"
   weather_DF <- weather_DF[, c("TS", "Temp", "RH", "VPD", "SR", "WS")]
   
+  # save a vector with the time when we have complete weather information
+  wth_complete <- weather_DF %>% select(-VPD)
+  wth_complete <- data.frame(TS = wth_complete$TS, comp_wth_data = complete.cases(wth_complete))
+  wth_date <- lubridate::date(wth_complete$TS)
+  wth_time <- strftime(wth_complete$TS, format="%H:%M:%S", tz="UTC")
+  wth_complete$TS <- paste(wth_date, wth_time)
   
   # Preprocess each weather variable except VPD #
   weather_DF[ , 2] <- prepcsWthr(x = weather_DF, y = 2) # temperature
@@ -657,10 +664,15 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   res_smth <- TR_res_processing(allFeatures = allFeatures, unq.dts = unq.dts,
                                 d_trans = smth.trans, raw = FALSE)
   
+  # form the data.frame containing information about overlapping weather data
+  # and time series
+  date_ref <- data.frame(TS = colnames(res_smth$TR_smth)[6:ncol(res_smth$TR_smth)])
+  wth_complete <- merge(x = date_ref, wth_complete, by = "TS", all.x = TRUE)
+  
   #### return results ----
   
-  results <- list(TR_raw = res_raw, TR_smth = res_smth)
-  class(results) <- c('TRres', 'list')
+  results <- list(TR_raw = res_raw, TR_smth = res_smth,
+                  wth_complete = wth_complete, LAI_miss = Tr_OP$LAI_miss)
   
   end.time <- Sys.time()
   

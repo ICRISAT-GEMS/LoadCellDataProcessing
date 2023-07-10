@@ -55,7 +55,7 @@ containing the following columns (variables):
 
 \describe{
  \item{\code{sensor}}{a character vector describing the sensor information}
- \item{\code{variable}}{a character vector indicating the type of weather information. Must be one of: Temperature (Â°C), Relative humidity (\%)), Windspeed average (m/s), Windspeed max (m/s), Solar radiation (W/(s*mÂ²)), Precipitation (mm), or Wind direction (Â°).}
+ \item{\code{variable}}{a character vector indicating the type of weather information. Must be one of: Temperature (°C), Relative humidity (\%)), Windspeed average (m/s), Windspeed max (m/s), Solar radiation (W/(s*m²)), Precipitation (mm), or Wind direction (°).}
  \item{\code{timestamp}}{a character vector indicating the time of measurement in format yyyy-mm-dd hh:mm:ss.}
  \item{\code{value}}{a numeric vector indicating the variable value.}
 }

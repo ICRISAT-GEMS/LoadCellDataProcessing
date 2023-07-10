@@ -22,10 +22,15 @@ check_wth_data <- function(d){
   
   # check the content of variable
   
-  var_id <- c("Temperature (Â°C)", "Relative humidity (%)",
-              "Windspeed average (m/s)", "Windspeed max (m/s)",        
-              "Solar radiation (W/(s*mÂ²))", "Precipitation (mm)",
-              "Wind direction (Â°)")
+  # var_id <- c("Temperature (Â°C)", "Relative humidity (%)",
+  #             "Windspeed average (m/s)", "Windspeed max (m/s)",        
+  #             "Solar radiation (W/(s*mÂ²))", "Precipitation (mm)",
+  #             "Wind direction (Â°)")
+  
+  var_id <- c("Temperature (°C)", "Relative humidity (%)",
+              "Windspeed average (m/s)", "Windspeed max (m/s)",
+              "Solar radiation (W/(s*m²))", "Precipitation (mm)",
+              "Wind direction (°)")
   
   if(any(!(d$variable[1:100] %in% var_id))){
     

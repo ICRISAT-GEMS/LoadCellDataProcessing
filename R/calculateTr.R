@@ -1,8 +1,10 @@
-	calculateTr <- function(x, y, z, d, LAI.all.dates) {
+calculateTr <- function(x, y, z, d, LAI.all.dates) {
   
   ETr_filt_imputed_FILE <- x; pe.df.ETr <- y;
   
   LAI.mat <- z; unq.dts <- d
+  
+  LAI_miss <- LAI.all.dates
   
   ETr_smth.mat <- ETr_filt_imputed_FILE[9:nrow(ETr_filt_imputed_FILE), 
                                         6:ncol(ETr_filt_imputed_FILE)]
@@ -26,6 +28,9 @@
              date.mat$val[j] <- NA)  
     }
     
+    # Fill the matrix to record the LAI values (before imputation)
+    LAI_miss[i, ] <- date.mat$val
+    
     date.mat$val <- na.spline(date.mat$val)
     date.mat$val[date.mat$val < 0] <- 0
     # date.mat$val <- na.aggregate.default(date.mat$val)
@@ -48,5 +53,6 @@
     
   }
   
-  list(Trans.mat = Trans.mat, LA3D_TS = LAI.all.dates, LAI.mat = LAI.mat)
+  list(Trans.mat = Trans.mat, LA3D_TS = LAI.all.dates, LAI.mat = LAI.mat,
+       LAI_miss = LAI_miss)
 }

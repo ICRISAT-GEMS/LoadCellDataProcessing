@@ -94,21 +94,34 @@ extractRawLCmatrix <- function(x, y, z) {
   hms.ts.base<-unique(TS_base$time)
   names(hms.ts.base)<-c("time")
 
-  print("Loadcell matrix timestamp mapping status")
-
-  i<-nrow(m.lc.df)
-  pbar <- plyr::create_progress_bar("text")
-  pbar$init(i)
-
-  for(i in 1:nrow(m.lc.df))
-  {
-    if(! m.lc.df$time[i] %in% hms.ts.base)
-    {
-      j <- which.min(abs(strptime(TS_base$time, "%H:%M") - strptime(m.lc.df$time[i], "%H:%M"))) # find which value in ts-base-vector is nearest to each-DP
-
-      m.lc.df$time[i] <- TS_base$time[j]} # assign the nearest ts-base-vector value to that DP
-
-    pbar$step()
+  # old way to round the time data. Remove this part after few successful tests.
+  
+  # print("Loadcell matrix timestamp mapping status")
+  # 
+  # i<-nrow(m.lc.df)
+  # pbar <- plyr::create_progress_bar("text")
+  # pbar$init(i)
+  # 
+  # for(i in 1:nrow(m.lc.df))
+  # {
+  #   if(! m.lc.df$time[i] %in% hms.ts.base)
+  #   {
+  #     j <- which.min(abs(strptime(TS_base$time, "%H:%M") - strptime(m.lc.df$time[i], "%H:%M"))) # find which value in ts-base-vector is nearest to each-DP
+  # 
+  #     m.lc.df$time[i] <- TS_base$time[j]} # assign the nearest ts-base-vector value to that DP
+  # 
+  #   pbar$step()
+  # }
+  
+  # round the time values to the 15 min 
+  # only perform the analysis if some time do not match
+  test <- m.lc.df$time %in% hms.ts.base
+  if(any(!test)){
+    
+    time_temp <- lubridate::round_date(m.lc.df$ts, "15 minutes")
+    time_temp <- strftime(time_temp, format="%H:%M:%S", tz="UTC")
+    m.lc.df$time <- time_temp
+    
   }
 
   # combine date and new time and convert to time object
