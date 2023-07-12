@@ -105,7 +105,10 @@
 #' Default = NULL.
 #' 
 #' @param skew_test \code{Logical value} specifying if skewness test
-#' should be used to filter weather data. Default = TRUE.
+#' should be used to filter weather data. Default = TRUE.y
+#' 
+#' @param include_raw_res \code{Logical value} specifying if traits (features)
+#' extracted on raw data (non-smooth) should be included. Default = FALSE
 #' 
 #' @param get_feature_h2 \code{Logical value} specifying if the heritability
 #' of the features (using gam function) should be calculated? Default = FALSE.
@@ -117,24 +120,23 @@
 #' A \code{list} that contain two lists: one for the raw transpiration results,
 #' the other for the smooth transpiration results. In both case. the list contains
 #' the following features organised per genotype and per day
-#' (example for results from TR raw):
+#' (example for results from TR smooth):
 #' 
-#'  \item{TR_raw}{Transpiration per genotype and time point (here every 15min)}
-#'  \item{Max_TR_raw}{Maximum transpiration per genotype and per day}
-#'  \item{slope_6pt_bfr_maxTR_raw}{Slope of the curvature between 6 data points (90 min)}
-#'  \item{slope_07_maxTR_raw}{slope of the curve between 07:00 and maxTR}
-#'  \item{slope_00_07_raw}{slope of the curve between 00:00 and 07:00}
-#'  \item{slope_19h_23h45_raw}{slope of the curve between 19:00 and 23:45}
-#'  \item{curve_maxTR_raw}{curvature or angle of the curve at maxTR}
-#'  \item{total_auc_raw}{Total area under the curve}
-#'  \item{auc_10h_15h_raw}{area under the curve 10-15h}
-#'  \item{sd_10h_15h_raw}{standard deviation TR values 10-15h}
-#'  \item{prop_auc_10h_15h_raw}{proportion of area under the curve between 10-15h}
-#'  \item{auc_7h_19h_raw}{Total area under the curve between 07:00 and 19:00}
-#'  \item{sd_7h_19h_raw}{standard deviation TR values between 07:00 and 19:00}
-#'  \item{prop_auc_7h_19h_raw}{proportion of area under the curve between 07:00 and 19:00}
-#'  \item{auc_night_raw}{Area under the curve during the night}
-#'  \item{sim_ETobs_ETPenMont_raw}{similarity between the ETr profile and the Penman Monteith ET}
+#'  \item{TR_smooth}{Transpiration per genotype and time point (here every 15min)}
+#'  \item{Max_TR_smooth}{Maximum transpiration per genotype and per day}
+#'  \item{slope_6pt_bfr_maxTR_smooth}{Slope of the curvature between 6 data points (90 min)}
+#'  \item{slope_07_maxTR_smooth}{slope of the curve between 07:00 and maxTR}
+#'  \item{slope_00_07_smooth}{slope of the curve between 00:00 and 07:00}
+#'  \item{slope_19h_23h45_smooth}{slope of the curve between 19:00 and 23:45}
+#'  \item{curve_maxTR_smooth}{curvature or angle of the curve at maxTR}
+#'  \item{total_auc_smooth}{Total area under the curve}
+#'  \item{auc_10h_15h_smooth}{area under the curve 10-15h}
+#'  \item{sd_10h_15h_smooth}{standard deviation TR values 10-15h}
+#'  \item{prop_auc_10h_15h_smooth}{proportion of area under the curve between 10-15h}
+#'  \item{auc_7h_19h_smooth}{Total area under the curve between 07:00 and 19:00}
+#'  \item{sd_7h_19h_smooth}{standard deviation TR values between 07:00 and 19:00}
+#'  \item{prop_auc_7h_19h_smooth}{proportion of area under the curve between 07:00 and 19:00}
+#'  \item{auc_night_smooth}{Area under the curve during the night}
 #'
 #' @author Soumyashree Kar, ICRISAT-GEMS
 #'
@@ -198,7 +200,9 @@
 
 TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
                          sensor_data = NULL, lastDate = NULL,
-                         irrg.dts = NULL, skew_test = TRUE, get_feature_h2 = FALSE){
+                         irrg.dts = NULL, skew_test = TRUE,
+                         include_raw_res = FALSE,
+                         get_feature_h2 = FALSE){
   
   ##### check function arguments format ----
   lc_data <- check_lc_data(lc_data)
@@ -601,29 +605,32 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   ####### Stage-III: a) Features extraction (raw) and res processing ----
   
   ### Feature Extraction of RAW Transpiration Data ###
-  featuresRES <- getFeatures(x = raw.trans)
-  
-  allFeatures <- featuresRES$allFeatures
-  
-  # create H2 dataframe to store H2 est. of each feature for each day
-  F.He <- as.data.frame(matrix(NA, nrow = length(unq.dts), ncol = 15)) # Date-ROW, feature-COL
-  colnames(F.He) <- c("maxET", "slope.maxET-6", "slope.07-maxET", "slope.00-07", "slope.19-23:45", "curvmaxET",
-                      "total.auc","auc.10-15", "sd.10-15", "auc.prop.10-15", "auc.07-19", "sd.07-19",
-                      "auc.prop.07-19", "auc.night", "cos.sim.index")
-  rownames(F.He) <- unq.dts
-  
-  # For now, do not save features per day.
-  
-  if(get_feature_h2){
+  if(include_raw_res){
     
-    # featureHeRES <- getFeatureHe(x = allFeatures, y = raw.trans, d = unq.dts, p = opPATH.raw)
-    featureHeRES <- getFeatureHe(x = allFeatures, y = raw.trans, d = unq.dts,
-                                 F.He = F.He)
+    featuresRES <- getFeatures(x = raw.trans)
+    allFeatures <- lapply(X = featuresRES, FUN = function(x) as.matrix(x[, -1]))
+    
+    # For now, do not save features per day.
+    
+    if(get_feature_h2){
+      
+      # create H2 dataframe to store H2 est. of each feature for each day
+      F.He <- as.data.frame(matrix(NA, nrow = length(unq.dts), ncol = 15)) # Date-ROW, feature-COL
+      colnames(F.He) <- c("maxET", "slope.maxET-6", "slope.07-maxET", "slope.00-07", "slope.19-23:45", "curvmaxET",
+                          "total.auc","auc.10-15", "sd.10-15", "auc.prop.10-15", "auc.07-19", "sd.07-19",
+                          "auc.prop.07-19", "auc.night")
+      rownames(F.He) <- unq.dts
+      
+      # featureHeRES <- getFeatureHe(x = allFeatures, y = raw.trans, d = unq.dts, p = opPATH.raw)
+      featureHeRES <- getFeatureHe(x = allFeatures, y = raw.trans, d = unq.dts,
+                                   F.He = F.He)
+      
+    }
+    
+    res_raw <- TR_res_processing(allFeatures = allFeatures, unq.dts = unq.dts,
+                                 d_trans = raw.trans)
     
   }
-  
-  res_raw <- TR_res_processing(allFeatures = allFeatures, unq.dts = unq.dts,
-                               d_trans = raw.trans)
   
   ###### Stage III: b) Generate smooth ETr  ----
   # ETr smoothing
@@ -644,17 +651,16 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   
   ###### Stage III: c) Features extraction (smooth) and res processing ----
   featuresRES <- getFeatures(x = smth.trans)
-  
-  allFeatures <- featuresRES$allFeatures
-  
-  # create H2 dataframe to store H2 est. of each feature for each day
-  F.He <- as.data.frame(matrix(NA, nrow = length(unq.dts), ncol = 15)) # Date-ROW, feature-COL
-  colnames(F.He) <- c("maxET", "slope.maxET-6", "slope.07-maxET", "slope.00-07", "slope.19-23:45", "curvmaxET",
-                      "total.auc","auc.10-15", "sd.10-15", "auc.prop.10-15", "auc.07-19", "sd.07-19",
-                      "auc.prop.07-19", "auc.night", "cos.sim.index")
-  rownames(F.He) <- unq.dts
+  allFeatures <- lapply(X = featuresRES, FUN = function(x) as.matrix(x[, -1]))
   
   if(get_feature_h2){
+    
+    # create H2 dataframe to store H2 est. of each feature for each day
+    F.He <- as.data.frame(matrix(NA, nrow = length(unq.dts), ncol = 15)) # Date-ROW, feature-COL
+    colnames(F.He) <- c("maxET", "slope.maxET-6", "slope.07-maxET", "slope.00-07", "slope.19-23:45", "curvmaxET",
+                        "total.auc","auc.10-15", "sd.10-15", "auc.prop.10-15", "auc.07-19", "sd.07-19",
+                        "auc.prop.07-19", "auc.night")
+    rownames(F.He) <- unq.dts
     
     featureHeRES <- getFeatureHe(x = allFeatures, y = smth.trans, d = unq.dts,
                                  F.He = F.He)
@@ -670,9 +676,19 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   wth_complete <- merge(x = date_ref, wth_complete, by = "TS", all.x = TRUE)
   
   #### return results ----
+  if(include_raw_res){
   
-  results <- list(TR_raw = res_raw, TR_smth = res_smth,
+    results <- list(TR_raw = res_raw, TR_smth = res_smth,
                   wth_complete = wth_complete, LAI_miss = Tr_OP$LAI_miss)
+    
+  } else {
+    
+    results <- list(TR_smth = res_smth, wth_complete = wth_complete,
+                    LAI_miss = Tr_OP$LAI_miss)
+    
+  }
+  
+  class(results) <- c('TRres', 'list')
   
   end.time <- Sys.time()
   

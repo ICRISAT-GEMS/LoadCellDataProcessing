@@ -12,6 +12,7 @@ TR_data_proc(
   lastDate = NULL,
   irrg.dts = NULL,
   skew_test = TRUE,
+  include_raw_res = FALSE,
   get_feature_h2 = FALSE
 )
 }
@@ -83,7 +84,10 @@ in YYYY-MM-DD format. If no such date is needed, same as the last date.
 Default = NULL.}
 
 \item{skew_test}{\code{Logical value} specifying if skewness test
-should be used to filter weather data. Default = TRUE.}
+should be used to filter weather data. Default = TRUE.y}
+
+\item{include_raw_res}{\code{Logical value} specifying if traits (features)
+extracted on raw data (non-smooth) should be included. Default = FALSE}
 
 \item{get_feature_h2}{\code{Logical value} specifying if the heritability
 of the features (using gam function) should be calculated? Default = FALSE.}
@@ -94,24 +98,23 @@ Return:
 A \code{list} that contain two lists: one for the raw transpiration results,
 the other for the smooth transpiration results. In both case. the list contains
 the following features organised per genotype and per day
-(example for results from TR raw):
+(example for results from TR smooth):
 
- \item{TR_raw}{Transpiration per genotype and time point (here every 15min)}
- \item{Max_TR_raw}{Maximum transpiration per genotype and per day}
- \item{slope_6pt_bfr_maxTR_raw}{Slope of the curvature between 6 data points (90 min)}
- \item{slope_07_maxTR_raw}{slope of the curve between 07:00 and maxTR}
- \item{slope_00_07_raw}{slope of the curve between 00:00 and 07:00}
- \item{slope_19h_23h45_raw}{slope of the curve between 19:00 and 23:45}
- \item{curve_maxTR_raw}{curvature or angle of the curve at maxTR}
- \item{total_auc_raw}{Total area under the curve}
- \item{auc_10h_15h_raw}{area under the curve 10-15h}
- \item{sd_10h_15h_raw}{standard deviation TR values 10-15h}
- \item{prop_auc_10h_15h_raw}{proportion of area under the curve between 10-15h}
- \item{auc_7h_19h_raw}{Total area under the curve between 07:00 and 19:00}
- \item{sd_7h_19h_raw}{standard deviation TR values between 07:00 and 19:00}
- \item{prop_auc_7h_19h_raw}{proportion of area under the curve between 07:00 and 19:00}
- \item{auc_night_raw}{Area under the curve during the night}
- \item{sim_ETobs_ETPenMont_raw}{similarity between the ETr profile and the Penman Monteith ET}
+ \item{TR_smooth}{Transpiration per genotype and time point (here every 15min)}
+ \item{Max_TR_smooth}{Maximum transpiration per genotype and per day}
+ \item{slope_6pt_bfr_maxTR_smooth}{Slope of the curvature between 6 data points (90 min)}
+ \item{slope_07_maxTR_smooth}{slope of the curve between 07:00 and maxTR}
+ \item{slope_00_07_smooth}{slope of the curve between 00:00 and 07:00}
+ \item{slope_19h_23h45_smooth}{slope of the curve between 19:00 and 23:45}
+ \item{curve_maxTR_smooth}{curvature or angle of the curve at maxTR}
+ \item{total_auc_smooth}{Total area under the curve}
+ \item{auc_10h_15h_smooth}{area under the curve 10-15h}
+ \item{sd_10h_15h_smooth}{standard deviation TR values 10-15h}
+ \item{prop_auc_10h_15h_smooth}{proportion of area under the curve between 10-15h}
+ \item{auc_7h_19h_smooth}{Total area under the curve between 07:00 and 19:00}
+ \item{sd_7h_19h_smooth}{standard deviation TR values between 07:00 and 19:00}
+ \item{prop_auc_7h_19h_smooth}{proportion of area under the curve between 07:00 and 19:00}
+ \item{auc_night_smooth}{Area under the curve during the night}
 }
 \description{
 Processing of the transpiration data collected on the load cells of the

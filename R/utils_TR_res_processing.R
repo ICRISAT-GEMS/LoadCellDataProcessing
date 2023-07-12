@@ -13,8 +13,7 @@ TR_res_processing <- function(allFeatures, unq.dts, d_trans, raw = TRUE){
                     'slope_07_maxTR_raw', 'slope_00_07_raw', 'slope_19h_23h45_raw',
                     'curve_maxTR_raw', 'total_auc_raw', 'auc_10h_15h_raw',
                     'sd_10h_15h_raw', 'prop_auc_10h_15h_raw', 'auc_7h_19h_raw',
-                    'sd_7h_19h_raw', 'prop_auc_7h_19h_raw', 'auc_night_raw',
-                    'sim_ETobs_ETPenMont_raw')
+                    'sd_7h_19h_raw', 'prop_auc_7h_19h_raw', 'auc_night_raw')
   
   if(!raw){
     feature_list <- gsub(pattern = '_raw', replacement = '_smth', x = feature_list)
