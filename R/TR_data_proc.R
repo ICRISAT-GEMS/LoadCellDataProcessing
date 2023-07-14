@@ -105,7 +105,14 @@
 #' Default = NULL.
 #' 
 #' @param skew_test \code{Logical value} specifying if skewness test
-#' should be used to filter weather data. Default = TRUE.y
+#' should be used to filter weather data. Default = TRUE
+#' 
+#' @param calc_TR \code{Logical value} specifying if transpiration rate should
+#' be calculated (TR = Tr/leafArea) or only transpiration. Default = FALSE
+#' 
+#' @param calc_TR_opt1 \code{Logical value} specifying if transpiration rate should
+#' be calculated using formula 1 (TR = Tr/ (LAI*0.26*10^4)) or (TR = Tr/ lai.sec.temp/100 ???).
+#' Default = TRUE (formula 1)
 #' 
 #' @param include_raw_res \code{Logical value} specifying if traits (features)
 #' extracted on raw data (non-smooth) should be included. Default = FALSE
@@ -148,8 +155,6 @@
 #' Plant methods, 16(1), 1-20.
 #'
 #' @examples
-#'
-#' library(plyr)
 #' 
 #' data(lc_data)
 #' data(pe_data)
@@ -201,6 +206,8 @@
 TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
                          sensor_data = NULL, lastDate = NULL,
                          irrg.dts = NULL, skew_test = TRUE,
+                         calc_TR = FALSE,
+                         calc_TR_opt1 = TRUE,
                          include_raw_res = FALSE,
                          get_feature_h2 = FALSE){
   
@@ -319,23 +326,22 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   ####### Stage-II: a) Process Weather data to obtain ETref and ETr ratio matrix ----
   
   clm.df.mapped <- clm.df[clm.df$sensor %in% sensor.unit.df$sensor, ]
-  unq.clm.var <- unique(clm.df.mapped$variable)
   
   # Extract weather variables individually; Assign numbers appropriately #
-  temperature_DF <- extractWthrVar(y = clm.df.mapped, sel_wth_var = unq.clm.var[1],
+  temperature_DF <- extractWthrVar(y = clm.df.mapped, sel_wth_var = "Temperature (°C)",
                                    skew_test = skew_test)
   
   temperature_DF$ts <- temperature_DF$ts + 5.5*60*60
   
-  relHUM_DF <- extractWthrVar(y = clm.df.mapped, sel_wth_var = unq.clm.var[2],
+  relHUM_DF <- extractWthrVar(y = clm.df.mapped, sel_wth_var = "Relative humidity (%)",
                               skew_test = skew_test)
   relHUM_DF$ts <- relHUM_DF$ts + 5.5*60*60
   
-  wind_DF <- extractWthrVar(y = clm.df.mapped, sel_wth_var = unq.clm.var[3],
+  wind_DF <- extractWthrVar(y = clm.df.mapped, sel_wth_var = "Windspeed average (m/s)",
                             skew_test = skew_test)
   wind_DF$ts <- wind_DF$ts + 5.5*60*60
   
-  solarRad_DF <- extractWthrVar(y = clm.df.mapped, sel_wth_var = unq.clm.var[5],
+  solarRad_DF <- extractWthrVar(y = clm.df.mapped, sel_wth_var = "Solar radiation (W/(s*m²))",
                                 skew_test = skew_test)
   solarRad_DF$ts <- solarRad_DF$ts + 5.5*60*60
   
@@ -570,11 +576,6 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   pe.df.ETr$Genotype <- factor(pe.df.ETr$Genotype)
   pe.df.ETr$Replicates <- factor(pe.df.ETr$Replicates)
   
-  pe.ETr.grpDT <- pe.df.ETr %>% group_by(old_unit, date, Genotype, Replicates) %>%
-    dplyr::summarise(Max = max(LeafArea3D, na.rm=TRUE))
-  
-  names(pe.ETr.grpDT)[5] <- "LeafArea3D"
-  
   # make a matrix of LA3D of dim = ETr_core data, then calculate TR #
   ## LAI=((((3DLA/100) - 29.9)/0.36)*(1/0.26))/10000 ##
   ## T = (1-exp(-0.463*LAI))*ETr ##
@@ -593,14 +594,17 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   
   
   # Calculate raw Transpiration, Tr
+  if(include_raw_res){
   Tr_OP <- calculateTr(x = ETr_filt_imputed_FILE, y = pe.df.ETr, z = LAI.mat,
-                       d = unq.dts, LAI.all.dates = LAI.all.dates)
-  
+                       d = unq.dts, LAI.all.dates = LAI.all.dates, calc_TR = calc_TR,
+                       calc_TR_opt1 = calc_TR_opt1)
+
   LAI.mat <- Tr_OP$LAI.mat
-  
+
   raw.trans <- ETr_filt_imputed_FILE
-  
+
   raw.trans[9:nrow(raw.trans), 6:ncol(raw.trans)] <- Tr_OP$Trans.mat
+  }
   
   ####### Stage-III: a) Features extraction (raw) and res processing ----
   
@@ -642,7 +646,8 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   
   # Calculate Tr from smooth ETr
   Tr_OP <- calculateTr(x = ETr_smoothFILE, y = pe.df.ETr, z = LAI.mat, d = unq.dts,
-                       LAI.all.dates = LAI.all.dates)
+                       LAI.all.dates = LAI.all.dates, calc_TR = calc_TR,
+                       calc_TR_opt1 = calc_TR_opt1)
   
   # smooth transpiration data
   smth.trans.mat <- Tr_OP$Trans.mat

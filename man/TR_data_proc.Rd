@@ -12,6 +12,8 @@ TR_data_proc(
   lastDate = NULL,
   irrg.dts = NULL,
   skew_test = TRUE,
+  calc_TR = FALSE,
+  calc_TR_opt1 = TRUE,
   include_raw_res = FALSE,
   get_feature_h2 = FALSE
 )
@@ -84,7 +86,14 @@ in YYYY-MM-DD format. If no such date is needed, same as the last date.
 Default = NULL.}
 
 \item{skew_test}{\code{Logical value} specifying if skewness test
-should be used to filter weather data. Default = TRUE.y}
+should be used to filter weather data. Default = TRUE}
+
+\item{calc_TR}{\code{Logical value} specifying if transpiration rate should
+be calculated (TR = Tr/leafArea) or only transpiration. Default = FALSE}
+
+\item{calc_TR_opt1}{\code{Logical value} specifying if transpiration rate should
+be calculated using formula 1 (TR = Tr/ (LAI*0.26*10^4)) or (TR = Tr/ lai.sec.temp/100 ???).
+Default = TRUE (formula 1)}
 
 \item{include_raw_res}{\code{Logical value} specifying if traits (features)
 extracted on raw data (non-smooth) should be included. Default = FALSE}
@@ -153,8 +162,6 @@ raw TR parameters from TR_raw (See Value section for parameter definition).
 Then the same parameters are extracted but from TR_smth.
 }
 \examples{
-
-library(plyr)
 
 data(lc_data)
 data(pe_data)

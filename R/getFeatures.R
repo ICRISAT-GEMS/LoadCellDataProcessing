@@ -56,7 +56,7 @@ getFeatures <- function(x) {
   d$date <- dd.meta$date
   
   d_proc <- d %>% group_by(sector, date) %>%
-    summarise(maxET = max(value, na.rm = TRUE),
+    summarise(maxET = ETmax_fct(x = value),
               slope_min6_maxET = slope_min6_maxET(x = value),
               slope_7_maxET = slope_7_maxET(x = value),
               slope_0_7 = slope_t1_t2(x = value, t1 = 1, t2 = 29),

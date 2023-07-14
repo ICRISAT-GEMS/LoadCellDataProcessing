@@ -1,4 +1,4 @@
-calculateTr <- function(x, y, z, d, LAI.all.dates) {
+calculateTr <- function(x, y, z, d, LAI.all.dates, calc_TR = TRUE, calc_TR_opt1 = TRUE) {
   
   ETr_filt_imputed_FILE <- x; pe.df.ETr <- y;
   
@@ -47,9 +47,24 @@ calculateTr <- function(x, y, z, d, LAI.all.dates) {
     # Calculate Transpiration #
     Trans.mat[i, ] <- (1-(1-exp(-0.463*LAI.mat[i, ])))*ETr_smth.mat[i, ] 
     
-    # Calculate Transpiration Rate #
+    # Calculate Transpiration Rate (old code) #
     # TR.mat[i, ] <- (Trans.mat[i, ]/ (LAI.mat[i, ]*0.26*10^4))
     # TR.mat[i, ] <- (Trans.mat[i, ]/ (sec.lai.tmp/100))
+    
+    if(calc_TR){
+      
+      # Calculate Transpiration Rate
+      if(calc_TR_opt1){
+        LAI_temp <- LAI.mat[i, ]
+        LAI_temp[LAI_temp == 0] <- NA
+        Trans.mat[i, ] <- (Trans.mat[i, ]/ (LAI_temp*0.26*10^4))
+      } else {
+        LAI_temp <- sec.lai.tmp
+        LAI_temp[LAI_temp == 0] <- NA
+        Trans.mat[i, ] <- (Trans.mat[i, ]/ (LAI_temp/100))
+      }
+      
+    }
     
   }
   
