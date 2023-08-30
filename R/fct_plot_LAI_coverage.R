@@ -28,11 +28,13 @@ plot_LAI_coverage <- function(results){
   colnames(d) <- c("sector", "day", "z")
   d$day <- rep(1:ncol(results$LAI_miss), each = nrow(results$LAI_miss))
   d$y <- rep(1:nrow(results$LAI_miss), ncol(results$LAI_miss))
+  days <- unique(d$day)
   
   p <- ggplot(d, aes(x = day, y = y)) + 
     geom_raster(aes(fill=z)) + 
     scale_fill_gradient(low="white", high="green") +
-    labs(x="days", y="sectors", title="LAI coverage")
+    labs(x="days", y="sectors", title="LAI coverage") +
+    geom_vline(xintercept = days, linetype="dotted", color = "black", linewidth = 0.5)
   
   return(p)
   

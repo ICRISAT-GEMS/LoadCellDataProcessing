@@ -114,6 +114,13 @@
 #' be calculated using formula 1 (TR = Tr/ (LAI*0.26*10^4)) or (TR = Tr/ lai.sec.temp/100 ???).
 #' Default = TRUE (formula 1)
 #' 
+#' @param LAI_correction \code{Logical value} specifying if the function should
+#' should calculate the transpiration Tr = 1-(1-exp(-0.463*LAI)))*ETr (default),
+#' or if the LAI correction part should be ignored (LAI_correction = FALSE).
+#' For example, when there are issue with the plant eye (leaf area) data.
+#' In that case, Tr = ETr, so the features will be extracted from the
+#' evapotranspiration profile and not the transpiration profile. Default = TRUE.
+#' 
 #' @param include_raw_res \code{Logical value} specifying if traits (features)
 #' extracted on raw data (non-smooth) should be included. Default = FALSE
 #' 
@@ -208,8 +215,10 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
                          irrg.dts = NULL, skew_test = TRUE,
                          calc_TR = FALSE,
                          calc_TR_opt1 = TRUE,
+                         LAI_correction = TRUE,
                          include_raw_res = FALSE,
-                         get_feature_h2 = FALSE){
+                         get_feature_h2 = FALSE,
+                         force_neg_Tr_zero = TRUE){
   
   ##### check function arguments format ----
   lc_data <- check_lc_data(lc_data)
@@ -597,7 +606,8 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   if(include_raw_res){
   Tr_OP <- calculateTr(x = ETr_filt_imputed_FILE, y = pe.df.ETr, z = LAI.mat,
                        d = unq.dts, LAI.all.dates = LAI.all.dates, calc_TR = calc_TR,
-                       calc_TR_opt1 = calc_TR_opt1)
+                       calc_TR_opt1 = calc_TR_opt1, LAI_correction = LAI_correction,
+                       force_neg_Tr_zero = force_neg_Tr_zero)
 
   LAI.mat <- Tr_OP$LAI.mat
 
@@ -647,7 +657,8 @@ TR_data_proc <- function(lc_data = NULL, pe_data = NULL, wth_data = NULL,
   # Calculate Tr from smooth ETr
   Tr_OP <- calculateTr(x = ETr_smoothFILE, y = pe.df.ETr, z = LAI.mat, d = unq.dts,
                        LAI.all.dates = LAI.all.dates, calc_TR = calc_TR,
-                       calc_TR_opt1 = calc_TR_opt1)
+                       calc_TR_opt1 = calc_TR_opt1, LAI_correction = LAI_correction,
+                       force_neg_Tr_zero = force_neg_Tr_zero)
   
   # smooth transpiration data
   smth.trans.mat <- Tr_OP$Trans.mat

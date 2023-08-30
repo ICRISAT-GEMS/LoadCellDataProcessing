@@ -61,11 +61,12 @@ plot_TR_time_series <- function(results, trait = "TRmax", n_sector = NULL,
   
   d_plot <- data.frame(tr = tr_val, sector = rep(sect_id, each = n_days),
                        day = rep(days, n_sect))
-    
-    p <- ggplot(data = d_plot, aes(x = day, y = tr, group = sector)) + geom_line() +
+  
+  p <- ggplot(data = d_plot, aes(x = day, y = tr, group = sector)) + geom_line() +
     ylab(var_id_lk[trait]) + ggtitle(main) +
-    {if(!color)theme(legend.position = 'none')}
-    
+    {if(!color)theme(legend.position = 'none')} +
+    geom_vline(xintercept = days, linetype="dotted", color = "black", linewidth = 0.5)
+  
   
   return(p)
   

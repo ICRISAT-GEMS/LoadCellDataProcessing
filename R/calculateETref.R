@@ -62,6 +62,8 @@ calculateETref <- function(x) {
     
     ETref <- ((0.408*del*Rng) + 0.063189*((900/96)*ws*(es-ea))/(t+273))/(del+0.063189*(1+0.34*ws)) ## 96 is the constant
     
+    # ETref <- ((0.408*del*Rng) + (0.063189*((900/96)/(t+273))*ws*(es-ea)))/(del+(0.063189*(1+0.34*ws))): cleaner way to write it
+    
     if(ETref == 0.0){
       
       wthr.df1$ETref[i] <- NA

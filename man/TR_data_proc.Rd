@@ -14,8 +14,10 @@ TR_data_proc(
   skew_test = TRUE,
   calc_TR = FALSE,
   calc_TR_opt1 = TRUE,
+  LAI_correction = TRUE,
   include_raw_res = FALSE,
-  get_feature_h2 = FALSE
+  get_feature_h2 = FALSE,
+  force_neg_Tr_zero = TRUE
 )
 }
 \arguments{
@@ -94,6 +96,13 @@ be calculated (TR = Tr/leafArea) or only transpiration. Default = FALSE}
 \item{calc_TR_opt1}{\code{Logical value} specifying if transpiration rate should
 be calculated using formula 1 (TR = Tr/ (LAI*0.26*10^4)) or (TR = Tr/ lai.sec.temp/100 ???).
 Default = TRUE (formula 1)}
+
+\item{LAI_correction}{\code{Logical value} specifying if the function should
+should calculate the transpiration Tr = 1-(1-exp(-0.463*LAI)))*ETr (default),
+or if the LAI correction part should be ignored (LAI_correction = FALSE).
+For example, when there are issue with the plant eye (leaf area) data.
+In that case, Tr = ETr, so the features will be extracted from the
+evapotranspiration profile and not the transpiration profile. Default = TRUE.}
 
 \item{include_raw_res}{\code{Logical value} specifying if traits (features)
 extracted on raw data (non-smooth) should be included. Default = FALSE}

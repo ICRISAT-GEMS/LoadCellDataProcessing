@@ -31,6 +31,11 @@ plot_whole_TR_time_series <- function(results, sector_sel,
   d_TR <- d_TR[9:nrow(d_TR), ]
   geno_id <- d_TR$G..Alias[sector_sel]
   d_TR <- d_TR[sector_sel, 6:ncol(d_TR)]
+  
+  # find the limit of the day
+  ts <- ymd_hms(colnames(d_TR), tz = "UTC")
+  pos_0h00 <- which(hour(ts) == 0 & minute(ts) == 0)
+  
   n_sect <- length(sector_sel)
   n_dp <- ncol(d_TR)
   
@@ -46,7 +51,8 @@ plot_whole_TR_time_series <- function(results, sector_sel,
   d <- rbind(d, data.frame(geno = 'weather', TR = wth_vec, ts = 1:n_dp))
   
   p <- ggplot(data = d, aes(x = ts, y = TR, group = geno, col = geno)) + geom_line() +
-    ylab("transpiration") + ggtitle(main)
+    ylab("transpiration") + ggtitle(main) +
+    geom_vline(xintercept = pos_0h00, linetype="dotted", color = "black", linewidth = 0.3)
   
   return(p)
   

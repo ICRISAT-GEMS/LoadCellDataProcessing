@@ -1,4 +1,6 @@
-calculateTr <- function(x, y, z, d, LAI.all.dates, calc_TR = TRUE, calc_TR_opt1 = TRUE) {
+calculateTr <- function(x, y, z, d, LAI.all.dates, calc_TR = FALSE,
+                        calc_TR_opt1 = TRUE, LAI_correction = TRUE,
+                        force_neg_Tr_zero = TRUE) {
   
   ETr_filt_imputed_FILE <- x; pe.df.ETr <- y;
   
@@ -14,38 +16,47 @@ calculateTr <- function(x, y, z, d, LAI.all.dates, calc_TR = TRUE, calc_TR_opt1 
   
   for(i in 1:nrow(LAI.mat)){
     
-    la.df.tmp <- pe.df.ETr[pe.df.ETr$old_unit == rownames(LAI.mat)[i], ]
-    
-    la.df.med <- la.df.tmp %>% group_by(date) %>% 
-      dplyr::summarise(Med_LeafArea3D = median(LeafArea3D))
-    
-    date.mat <- data.frame(date = unq.dts, val = rep(NA, length(unq.dts)))
-    
-    for(j in 1:nrow(date.mat))
-    {
-      ifelse(date.mat$date[j] %in% la.df.med$date, 
-             date.mat$val[j] <- la.df.med$Med_LeafArea3D[la.df.med$date == date.mat$date[j]],
-             date.mat$val[j] <- NA)  
+    if(LAI_correction){
+      
+      la.df.tmp <- pe.df.ETr[pe.df.ETr$old_unit == rownames(LAI.mat)[i], ]
+      
+      la.df.med <- la.df.tmp %>% group_by(date) %>% 
+        dplyr::summarise(Med_LeafArea3D = median(LeafArea3D))
+      
+      date.mat <- data.frame(date = unq.dts, val = rep(NA, length(unq.dts)))
+      
+      for(j in 1:nrow(date.mat))
+      {
+        ifelse(date.mat$date[j] %in% la.df.med$date, 
+               date.mat$val[j] <- la.df.med$Med_LeafArea3D[la.df.med$date == date.mat$date[j]],
+               date.mat$val[j] <- NA)  
+      }
+      
+      # Fill the matrix to record the LAI values (before imputation)
+      LAI_miss[i, ] <- date.mat$val
+      
+      date.mat$val <- na.spline(date.mat$val)
+      date.mat$val[date.mat$val < 0] <- 0
+      # date.mat$val <- na.aggregate.default(date.mat$val)
+      
+      LAI.all.dates[i, ] <- date.mat$val
+      
+      sec.lai.tmp <- rep(date.mat$val, each = 96)
+      
+      # Calculate LAI #
+      # LAI.mat[i, ] <- ((((sec.lai.tmp/100) - 29.9)/0.36)*(1/0.26)/10000)
+      LAI.mat[i, ] <- ((((sec.lai.tmp/100))/0.36)*(1/0.26)/10000)
+      # LAI.mat[i, ] <- (((sec.lai.tmp*1.0114) - 0.0842)/0.26)/10^6
+      
+      # Calculate Transpiration #
+      Trans.mat[i, ] <- (1-(1-exp(-0.463*LAI.mat[i, ])))*ETr_smth.mat[i, ]
+      
+    } else { # ignore the LAI correction
+      
+      # Calculate Transpiration #
+      Trans.mat[i, ] <- ETr_smth.mat[i, ]
+      
     }
-    
-    # Fill the matrix to record the LAI values (before imputation)
-    LAI_miss[i, ] <- date.mat$val
-    
-    date.mat$val <- na.spline(date.mat$val)
-    date.mat$val[date.mat$val < 0] <- 0
-    # date.mat$val <- na.aggregate.default(date.mat$val)
-    
-    LAI.all.dates[i, ] <- date.mat$val
-    
-    sec.lai.tmp <- rep(date.mat$val, each = 96)
-    
-    # Calculate LAI #
-    # LAI.mat[i, ] <- ((((sec.lai.tmp/100) - 29.9)/0.36)*(1/0.26)/10000)
-    LAI.mat[i, ] <- ((((sec.lai.tmp/100))/0.36)*(1/0.26)/10000)
-    # LAI.mat[i, ] <- (((sec.lai.tmp*1.0114) - 0.0842)/0.26)/10^6
-    
-    # Calculate Transpiration #
-    Trans.mat[i, ] <- (1-(1-exp(-0.463*LAI.mat[i, ])))*ETr_smth.mat[i, ] 
     
     # Calculate Transpiration Rate (old code) #
     # TR.mat[i, ] <- (Trans.mat[i, ]/ (LAI.mat[i, ]*0.26*10^4))
@@ -65,6 +76,12 @@ calculateTr <- function(x, y, z, d, LAI.all.dates, calc_TR = TRUE, calc_TR_opt1 
       }
       
     }
+    
+  }
+  
+  if(force_neg_Tr_zero){
+    
+    Trans.mat[Trans.mat < 0] <- 0
     
   }
   
