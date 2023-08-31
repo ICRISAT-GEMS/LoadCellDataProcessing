@@ -41,6 +41,9 @@ check_wth_data <- function(d){
     
   }
   
+  # check the format of the timestamp values
+  check_timestamp_format(d$timestamp)
+  
   return(d)
   
 }

@@ -22,6 +22,9 @@ check_lc_data <- function(d){
     
   }
   
+  # check the format of the timestamp values
+  check_timestamp_format(d$timestamp)
+  
   colnames(d)[colnames(d) == 'sector'] <- 'unit'
   
   return(d)
